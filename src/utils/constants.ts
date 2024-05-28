@@ -15,26 +15,22 @@ export const сategoryType = {
 }
 
 //Список отслеживаемых событий
-export const eventsList = {
-  //
-  ['MODAL_OPEN']: 'modal:open',
-  ['MODAL_CLOSE']: 'modal:close',
-  
-  // ['PRODUCT_REMOVE_FROM_CART']: 'PRODUCT:removeProductFromCart',
-  // ['PRODUCT_ADD_TO_CART']: 'product:addToCart',
+export enum events {
+  MODAL_OPEN = 'modal:open',
+  MODAL_CLOSE = 'modal:close',
 
-   //Изменение статуса "в корзине"
-  ['PRODUCT_CHANGE']: 'product:change',
+  //Изменение статуса "в корзине"
+  PRODUCT_CHANGE = 'product:change',
   //Открыть модальное окно с подробным описанием товара
-  ['PRODUCT_OPEN']: 'product:open',
+  PRODUCT_OPEN = 'product:open',
   //Событие открытия окна с корзиной
-  ['CART_OPEN']: 'cart:open',
+  CART_OPEN = 'cart:open',
   //Открыть модальное окно с формой данных о клиенте
-  ['CLIENT_OPEN']: 'client:open',
+  CLIENT_OPEN = 'client:open',
   //Отправка формы заказа
-  ['CLIENT_SUBMIT']: 'client:submit',
+  CLIENT_SUBMIT = 'client:submit',
   //Выбор типа оплаты
-  ['CLIENT_PAYMENT_TYPE']: 'client:changePaymentType',
+  CLIENT_PAYMENT_TYPE = 'client:changePaymentType',
   //Валидация формы
-  ['FORM_ERRORS_CHANGE']: 'formErrors:change',
+  FORM_ERRORS_CHANGE = 'formErrors:change',
 }

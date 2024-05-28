@@ -19,7 +19,7 @@ export interface IProduct {
   price: totalPrice,
 }
 
-export interface IProductInCart extends IProduct{
+export interface IProductInCart extends IProduct {
   selected: boolean;
 }
 
@@ -84,33 +84,43 @@ export interface IWebLarekApi {
   postOrder(data: orderBody): Promise<IOrderResult>,
 }
 
-//Отображение главной страницы
-export interface IPageView {
-  //Количество добавленых в корзину товаров
-  cartCounter: number;
-  //Массив карточек с товароами
-  catalog: HTMLElement[];
-  //Состояние страницы для css класса page__wrapper_locked
-  locked: boolean;
-}
-
-//Отобраденине корзины
-export interface ICartView {
-  //Шаблон карточек товаров
-  products: HTMLElement[];
-  //Общая стоимость товаров
-  total: totalPrice;
-}
-
 //Модальное окно
 export interface IModal {
   open(): void,
   close(): void,
-  loadContent(content: IModalContent): void,
+  loadContent(content: HTMLElement): void,
 }
-//Отображение модального окна
-export interface IModalContent {
-  //Вёрстка внутри модального окна
-  content: HTMLElement;
+
+//Тип для отображения товара - полная версия
+export type IProductFullView = {
+  title: string,
+  price: totalPrice,
+  description: string,
+  image: string,
+  category: ProductCategory,
+  addToCart?: HTMLButtonElement,
+  removeFromCart?: HTMLButtonElement,
+}
+//Тип отображения товара - версия для каталога на главной странице
+export type IProductCatalogView = Omit<IProductFullView, 'description' | 'removeFromCart' | 'addToCart'>;
+//Тип отображения товара - версия для корзины
+export type IProductCartView = Pick<IProductFullView, 'title' | 'price' | 'removeFromCart'> ;
+
+//Отображение главной страницы
+export interface IPageView {
+  //Количество добавленых в корзину товаров
+  cartCounter: number;
+  //Массив карточек с товарами
+  catalog: IProductFullView[];
+  //Состояние страницы для css класса page__wrapper_locked
+  locked: boolean;
+}
+
+//Отображение корзины
+export interface ICartView {
+  //Шаблон карточек товаров
+  products: IProductCartView[];
+  //Общая стоимость товаров
+  total: totalPrice;
 }
 

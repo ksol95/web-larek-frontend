@@ -173,29 +173,6 @@ export interface IWebLarekApi {
   //Метод отправки заказа от клиента на сервер
   postOrder(data: orderBody): Promise<IOrderResult>,
 }
-
-```
-
-Отображение главной страницы
-```
-export interface IPageView {
-  //Количество добавленых в корзину товаров
-  cartCounter: number;
-  //Массив карточек с товароами
-  catalog: HTMLElement[];
-  //Состояние страницы для css класса page__wrapper_locked
-  locked: boolean;
-}
-```
-
-Отображение корзины
-```
-export interface ICartView {
-  //Шаблон карточек товаров
-  products: HTMLElement[];
-  //Общая стоимость товаров
-  total: totalPrice;
-}
 ```
 
 Модальное окно
@@ -205,14 +182,56 @@ export interface IModal {
   close(): void,
   loadContent(content: IModalContent): void,
 }
+
+
+Тип для отображения товара - полная версия в модальном окне
 ```
-Отображение модального окна
-```
-export interface IModalContent {
-  //Вёрстка внутри модального окна
-  content: HTMLElement;
+export type IProductFullView = {
+  title: string,
+  price: totalPrice,
+  description: string,
+  image: string,
+  category: ProductCategory,
+  addToCart?: HTMLButtonElement,
+  removeFromCart?: HTMLButtonElement,
 }
 ```
+
+Тип отображения товара - версия для каталога на главной странице
+```
+export type IProductCatalogView = Omit<IProductFullView, 'description' | 'removeFromCart' | 'addToCart'>;
+```
+
+Отображение главной страницы
+```
+export interface IPageView {
+  //Количество добавленых в корзину товаров
+  cartCounter: number;
+  //Массив карточек с товароами
+  catalog: IProductFullView[];
+  //Состояние страницы для css класса page__wrapper_locked
+  locked: boolean;
+}
+```
+
+
+Тип отображения товара - версия для корзины
+```
+export type IProductCartView = Pick<IProductFullView, 'title' | 'price' | 'removeFromCart'> ;
+```
+
+Отображение корзины
+```
+export interface ICartView {
+  //Шаблон карточек товаров
+  products: IProductCartView[];
+  //Общая стоимость товаров
+  total: totalPrice;
+}
+```
+
+```
+
 
 
 
@@ -252,30 +271,26 @@ export interface IModalContent {
 
 ## 3. Описание событий
 
-События хранятся в объекте - "eventsList" по пути "./utils/constants.ts".
+События хранятся в объекте - "events" описаном в файле "./utils/constants.ts".
 ```
-export const eventsList = {
-  //События открытия и закрытия модальных окон
-  ['MODAL_OPEN']: 'modal:open',
-  ['MODAL_CLOSE']: 'modal:close',
+export enum events {
+  MODAL_OPEN = 'modal:open',
+  MODAL_CLOSE = 'modal:close',
 
   //Изменение статуса "в корзине"
-  ['PRODUCT_CHANGE']: 'product:change',
+  PRODUCT_CHANGE = 'product:change',
   //Открыть модальное окно с подробным описанием товара
-  ['PRODUCT_OPEN']: 'product:open',
-
+  PRODUCT_OPEN = 'product:open',
   //Событие открытия окна с корзиной
-  ['CART_OPEN']: 'cart:open',
-
+  CART_OPEN = 'cart:open',
   //Открыть модальное окно с формой данных о клиенте
-  ['CLIENT_OPEN']: 'client:open',
+  CLIENT_OPEN = 'client:open',
   //Отправка формы заказа
-  ['CLIENT_SUBMIT']: 'client:submit',
+  CLIENT_SUBMIT = 'client:submit',
   //Выбор типа оплаты
-  ['CLIENT_PAYMENT_TYPE']: 'client:changePaymentType',
+  CLIENT_PAYMENT_TYPE = 'client:changePaymentType',
   //Валидация формы
-
-  ['FORM_ERRORS_CHANGE']: 'formErrors:change',
+  FORM_ERRORS_CHANGE = 'formErrors:change',
 }
 ```
 
