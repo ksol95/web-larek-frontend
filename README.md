@@ -106,7 +106,7 @@ export interface IClientForm {
 ```
 export type FormErrors = Partial<Record<keyof IClientForm, string>>;
 ```
-Тип описывает объект который ъранит в себе ответ от сервера после отправки заказа.
+Тип описывает объект который хранит в себе ответ от сервера после отправки заказа.
 ```
 export interface IOrderResult {
   id: string,
