@@ -1,11 +1,6 @@
-// Модальные окна
-export enum AppStateModals {
-  product, //Окно с описанием продукта
-  cart, //Окно корзины
-  orderPay, //Окно с вводом адреса и выбором метода оплаты
-  orderClient, //Окно с формой ввода контактной информации клиента
-  orderSuccess, //Окно вывода сообщения с результатом заказа 
-}
+export type FormErrors = Partial<Record<keyof IClientForm, string>>;
+export type PaymentMethod = 'online' | 'offline';
+export type totalPrice = { total: number | null };
 //Тип принимает ограниченые значения соответсвующие с названиями категорий товаров с сервера
 export type ProductCategory =
   'софт-скил' |
@@ -15,22 +10,37 @@ export type ProductCategory =
   'кнопка'
   ;
 
-export type Currency = 'синапсов' | 'рублей';
-export type PaymentMethod = 'online' | 'offline';
-
 export interface IProduct {
   id: string,
   description: string,
   image: string,
   title: string,
   category: ProductCategory,
-  price: number | null,
-  inCart?: boolean, //Добавлен ли товар в корзину
+  price: totalPrice,
+}
+
+export interface IProductInCart extends IProduct{
+  selected: boolean;
 }
 
 export interface IProductList {
   total: number,
   items: IProduct[],
+}
+
+export interface IProductModel {
+  //Получить товары
+  setProducts(products: IProduct[]): void,
+  //Проверить добавлен ли товар в корзину
+  inCart(id: string): boolean,
+  //Вывести товары
+  getProducts(): IProduct[],
+  //Добавить товар в корзину
+  addToCart(id: string): void,
+  //Убрать товар из корзины
+  removeProductFromCart(id: string): void,
+  //Очитсить всю корзину
+  removeAllProductsFromCart(): void,
 }
 
 export interface IClientForm {
@@ -41,10 +51,66 @@ export interface IClientForm {
   address: string,
 }
 
-export type FormErrors = Partial<Record<keyof IClientForm, string>>;
-
 export interface IOrderResult {
   id: string,
-  total: number,
+  total: totalPrice,
   error?: string,
 }
+
+export interface ICartModel extends IClientForm {
+  //Суммарная стоимость выбраных продуктов
+  getTotalProducts(products: IProduct[]): totalPrice,
+  //Массив ID товаров в корзине
+  selectedProductId(product: IProduct[]): string[],
+  //Очистить данные о клиенте
+  clear(): void,
+}
+
+export type productsInCart = {
+  items: [
+    id: string,
+  ]
+}
+//Объект для отправки заказа
+export interface orderBody extends IClientForm, productsInCart, totalPrice { };
+
+//Интерфейс для подключения к API
+export interface IWebLarekApi {
+  //Получить товары
+  getProductList(): Promise<IProductList>,
+  //Получить товар по ID
+  getProduct(id: string): Promise<IProduct>,
+  //Метод отправки заказа от клиента на сервер
+  postOrder(data: orderBody): Promise<IOrderResult>,
+}
+
+//Отображение главной страницы
+export interface IPageView {
+  //Количество добавленых в корзину товаров
+  cartCounter: number;
+  //Массив карточек с товароами
+  catalog: HTMLElement[];
+  //Состояние страницы для css класса page__wrapper_locked
+  locked: boolean;
+}
+
+//Отобраденине корзины
+export interface ICartView {
+  //Шаблон карточек товаров
+  products: HTMLElement[];
+  //Общая стоимость товаров
+  total: totalPrice;
+}
+
+//Модальное окно
+export interface IModal {
+  open(): void,
+  close(): void,
+  loadContent(content: IModalContent): void,
+}
+//Отображение модального окна
+export interface IModalContent {
+  //Вёрстка внутри модального окна
+  content: HTMLElement;
+}
+

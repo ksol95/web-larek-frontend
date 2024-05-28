@@ -44,16 +44,21 @@ yarn build
 ## Документация
 ## 1. Описание данных
 
-Список всех модальных окон
+Тип для получения ошибки валидации формы клиента
 ```
-export enum AppStateModals {
-  product, //Окно с описанием продукта
-  cart, //Окно корзины
-  orderPay, //Окно с вводом адреса и выбором метода оплаты
-  orderClient, //Окно с формой ввода контактной информации клиента
-  orderSuccess, //Окно вывода сообщения с результатом заказа 
-}
+export type FormErrors = Partial<Record<keyof IClientForm, string>>;
 ```
+
+Тип для ограничения выбора значений платёжного метода
+```
+export type PaymentMethod = 'online' | 'offline';
+```
+
+Тип вывода стоимости, для учёта нулевой стоимости.
+```
+export type totalPrice = { total: number | null };
+```
+
 Тип принимает ограниченые значения соответсвующие с названиями категорий товаров с сервера
 ```
 export type ProductCategory =
@@ -64,15 +69,13 @@ export type ProductCategory =
   'кнопка'
   ;
 ```
-Тип для ограничения значений валюты
-```
-export type Currency = 'синапсов' | 'рублей';
-```
+
 Тип для ограничения значений способов оплаты
 ```
 export type PaymentMethod = 'online' | 'offline';
 ```
-Интерфейс объекта "Товар" содержит в себе все поля приходящих с сервера и дополнительное свойство "inCart" типа boolean.
+
+Интерфейс объекта "Товар" содержит в себе все поля приходящих с сервера и дополнительный интерфейс дополняющий товар свойством "selected" типа boolean.
 Предпологается что даное свойство сообщает находится ли товар в корзине или нет (по умолчанию false).
 ```
 export interface IProduct {
@@ -81,10 +84,15 @@ export interface IProduct {
   image: string,
   title: string,
   category: ProductCategory,
-  price: number | null,
-  inCart?: boolean, //Добавлен ли товар в корзину
+  price: totalPrice,
+}
+
+export interface IProductInCart extends IProduct{
+  selected: boolean;
 }
 ```
+
+
 Интерфейс объекта приходящего с сервара в ответ на запрос о получении всех товаров в магазине. Содержит в себе число всех товаров и массив товаров типа IProduct
 ```
 export interface IProductList {
@@ -92,6 +100,25 @@ export interface IProductList {
   items: IProduct[],
 }
 ```
+
+Интерфейс описывает модель продукта. Интерфейс содержит методы для получения/удаления данных типа IProduct, а так же добавить товар в корзину по средством установки свойства selected у товара в состояние true. 
+```
+export interface IProductModel {
+  //Получить товары
+  setProducts(products: IProduct[]): void,
+  //Проверить добавлен ли товар в корзину
+  inCart(id: string): boolean,
+  //Вывести товары
+  getProducts(): IProduct[],
+  //Добавить товар в корзину
+  addToCart(id: string): void,
+  //Убрать товар из корзины
+  removeProductFromCart(id: string): void,
+  //Очитсить всю корзину
+  removeAllProductsFromCart(): void,
+}
+```
+
 Интерфейс описывает объект "Клиент". Данный объект хранит информацию введеную пользователем в момент оформления заказа. 
 ```
 export interface IClientForm {
@@ -102,10 +129,7 @@ export interface IClientForm {
   address: string,
 }
 ```
-Тип для получения ошибки валидации формы клиента
-```
-export type FormErrors = Partial<Record<keyof IClientForm, string>>;
-```
+
 Тип описывает объект который хранит в себе ответ от сервера после отправки заказа.
 ```
 export interface IOrderResult {
@@ -115,52 +139,113 @@ export interface IOrderResult {
 }
 ```
 
+Тип описывает объект который хранит в себе ответ от сервера после отправки заказа.
+```
+export interface ICartModel extends IClientForm {
+  //Суммарная стоимость выбраных продуктов
+  getTotalProducts(products: IProduct[]): totalPrice,
+  //Массив ID товаров в корзине
+  selectedProductId(product: IProduct[]): string[],
+  //Очистить данные о клиенте
+  clear(): void,
+}
+```
+
+Объект для отправки заказа
+```
+export type productsInCart = {
+  items: [
+    id: string,
+  ]
+}
+
+export interface orderBody extends IClientForm, productsInCart, totalPrice { };
+
+```
+
+Интерфейс для подключения к API
+```
+export interface IWebLarekApi {
+  //Получить товары
+  getProductList(): Promise<IProductList>,
+  //Получить товар по ID
+  getProduct(id: string): Promise<IProduct>,
+  //Метод отправки заказа от клиента на сервер
+  postOrder(data: orderBody): Promise<IOrderResult>,
+}
+
+```
+
+Отображение главной страницы
+```
+export interface IPageView {
+  //Количество добавленых в корзину товаров
+  cartCounter: number;
+  //Массив карточек с товароами
+  catalog: HTMLElement[];
+  //Состояние страницы для css класса page__wrapper_locked
+  locked: boolean;
+}
+```
+
+Отображение корзины
+```
+export interface ICartView {
+  //Шаблон карточек товаров
+  products: HTMLElement[];
+  //Общая стоимость товаров
+  total: totalPrice;
+}
+```
+
+Модальное окно
+```
+export interface IModal {
+  open(): void,
+  close(): void,
+  loadContent(content: IModalContent): void,
+}
+```
+Отображение модального окна
+```
+export interface IModalContent {
+  //Вёрстка внутри модального окна
+  content: HTMLElement;
+}
+```
+
+
+
 ## 2. Модели данных
 
-Были выделены три интерфейса моделей данных:
-  1. Продукт - интерфейс расширяет IProductList методами необходимыми для работы с данными товара.
+Были выделены две модели данных:
+
+  1. Продукт - для работы с данными товара, добавления/удаления в корзину.
   ```
-  export interface IProductModel extends IProductList {
+  export interface IProductModel {
     //Получить товары
-    getProductList: () => Promise<IProductList>,
-    //Получить товар по ID
-    getProduct: (id: string) => Promise<IProduct>,
+    setProducts(products: IProduct[]): void,
     //Проверить добавлен ли товар в корзину
-    inCart: (id: string) => void,
+    inCart(id: string): boolean,
+    //Вывести товары
+    getProducts(): IProduct[],
     //Добавить товар в корзину
-    addToCart: (id: string) => void,
+    addToCart(id: string): void,
     //Убрать товар из корзины
-    removeProductFromCart: (id: string) => void,
+    removeProductFromCart(id: string): void,
     //Очитсить всю корзину
-    removeAllProductsFromCart: () => void,
+    removeAllProductsFromCart(): void,
   }
   ```
-  2. Клиент - интерфейс расширяет IClientForm методами необходимыми для работы с данными клиента в том числе отправки заказа.
+  2. Уорзина - интерфейс расширяет IClientForm методами необходимыми для работы с данными клиента.
   ```
-  export interface IClient extends IClientForm {
+  export interface ICartModel extends IClientForm {
     //Суммарная стоимость выбраных продуктов
-    getTotalProducts: (products: IProduct[]) => number | null,
+    getTotalProducts(products: IProduct[]): totalPrice,
     //Массив ID товаров в корзине
-    selectedProductId: (product: IProduct[]) => string[],
-    //Метод отправки заказа от клиента на сервер
-    postOrder: (orderBody: IClientForm, selectedProducts: string[], total: number | null) => Promise<IOrderResult>,
+    selectedProductId(product: IProduct[]): string[],
     //Очистить данные о клиенте
-    clear: () => void,
-  }
-  ```
-  3. Приложение - интерфейс модели данных основного приложения содержит в себе селекторы для отображение списка товаров, "запоминия" ID откытого в модальном окне товара, список всех модальных окон и ссыдку на открытое окно.
-  ```
-  export interface AppModal {
-    //ID "открытого" продукта
-    selectedProductID?: string;
-    //Список всех модальных окон
-    modals: AppStateModals | null, 
-    //Количесвто товаров в корзине
-    cartTotal: number,
-    //Селектор контейнера для вывода всех товаров
-    gallerySelector: string,
-    //Селектор кнопки открытия корзины
-    cartSelector: string,
+    clear(): void,
   }
   ```
   
