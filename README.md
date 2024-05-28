@@ -237,7 +237,7 @@ export interface IModalContent {
     removeAllProductsFromCart(): void,
   }
   ```
-  2. Уорзина - интерфейс расширяет IClientForm методами необходимыми для работы с данными клиента.
+  2. Корзина - интерфейс расширяет IClientForm методами необходимыми для работы с данными клиента.
   ```
   export interface ICartModel extends IClientForm {
     //Суммарная стоимость выбраных продуктов
