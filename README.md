@@ -40,3 +40,37 @@ npm run build
 ```
 yarn build
 ```
+
+## Документация
+##1. Описание данных
+
+##2. Модели данных
+
+##3. Описание событий
+
+События хранятся в объекте - "eventsList" по пути "./utils/constants.ts"
+```
+-   export const eventsList = {
+-     //События открытия и закрытия модальных окон
+-     ['MODAL_OPEN']: 'modal:open',
+-     ['MODAL_CLOSE']: 'modal:close',
+- 
+-     //Изменение статуса "в корзине"
+-     ['PRODUCT_CHANGE']: 'product:change',
+-     //Открыть модальное окно с подробным описанием товара
+-     ['PRODUCT_OPEN']: 'product:open',
+- 
+-     //Событие открытия окна с корзиной
+-     ['CART_OPEN']: 'cart:open',
+- 
+-    //Открыть модальное окно с формой данных о клиенте
+-     ['CLIENT_OPEN']: 'client:open',
+-     //Отправка формы заказа
+-     ['CLIENT_SUBMIT']: 'client:submit',
+-     //Выбор типа оплаты
+-     ['CLIENT_PAYMENT_TYPE']: 'client:changePaymentType',
+-     //Валидация формы
+- 
+-     ['FORM_ERRORS_CHANGE']: 'formErrors:change',
+-   }
+```
