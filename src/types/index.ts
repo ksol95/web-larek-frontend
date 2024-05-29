@@ -10,7 +10,7 @@ export type ProductCategory =
   'кнопка'
   ;
 
-export interface IProduct {
+export type Product = {
   id: string,
   description: string,
   image: string,
@@ -19,7 +19,7 @@ export interface IProduct {
   price: totalPrice,
 }
 
-export interface IProductInCart extends IProduct {
+export interface IProduct extends Product {
   selected: boolean;
 }
 

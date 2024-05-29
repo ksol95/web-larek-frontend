@@ -75,10 +75,12 @@ export type ProductCategory =
 export type PaymentMethod = 'online' | 'offline';
 ```
 
-Интерфейс объекта "Товар" содержит в себе все поля приходящих с сервера и дополнительный интерфейс дополняющий товар свойством "selected" типа boolean.
+Тип данных "Товар" содержит в себе все поля приходящих с сервера.
+
+Интерфейс IProduct основан на типе Product и дополняет его свойством "selected" типа boolean.
 Предпологается что даное свойство сообщает находится ли товар в корзине или нет (по умолчанию false).
 ```
-export interface IProduct {
+export type Product = {
   id: string,
   description: string,
   image: string,
@@ -87,7 +89,7 @@ export interface IProduct {
   price: totalPrice,
 }
 
-export interface IProductInCart extends IProduct{
+export interface IProduct extends Product{
   selected: boolean;
 }
 ```
