@@ -46,7 +46,7 @@ yarn build
 
 Тип для получения ошибки валидации формы клиента
 ```
-export type FormErrors = Partial<Record<keyof IClientForm, string>>;
+export type FormErrors = Partial<Record<keyof IOrderForm, string>>;
 ```
 
 Тип для ограничения выбора значений платёжного метода
@@ -123,7 +123,7 @@ export interface IProductModel {
 
 Интерфейс описывает объект "Клиент". Данный объект хранит информацию введеную пользователем в момент оформления заказа. 
 ```
-export interface IClientForm {
+export interface IOrderForm {
   id?: string, //На будущее
   payment: PaymentMethod,
   email: string,
@@ -143,7 +143,7 @@ export interface IOrderResult {
 
 Тип описывает объект который хранит в себе ответ от сервера после отправки заказа.
 ```
-export interface ICartModel extends IClientForm {
+export interface ICartModel extends IOrderForm {
   //Суммарная стоимость выбраных продуктов
   getTotalProducts(products: IProduct[]): totalPrice,
   //Массив ID товаров в корзине
@@ -161,7 +161,7 @@ export type productsInCart = {
   ]
 }
 
-export interface orderBody extends IClientForm, productsInCart, totalPrice { };
+export interface IOrderBody extends IOrderForm, productsInCart, totalPrice { };
 
 ```
 
@@ -173,7 +173,7 @@ export interface IWebLarekApi {
   //Получить товар по ID
   getProduct(id: string): Promise<IProduct>,
   //Метод отправки заказа от клиента на сервер
-  postOrder(data: orderBody): Promise<IOrderResult>,
+  postOrder(data: IOrderBody): Promise<IOrderResult>,
 }
 ```
 
@@ -259,9 +259,9 @@ export interface ICartView {
     removeAllProductsFromCart(): void,
   }
   ```
-  2. Корзина - интерфейс расширяет IClientForm методами необходимыми для работы с данными клиента.
+  2. Корзина - интерфейс расширяет IOrderForm методами необходимыми для работы с данными клиента.
   ```
-  export interface ICartModel extends IClientForm {
+  export interface ICartModel extends IOrderForm {
     //Суммарная стоимость выбраных продуктов
     getTotalProducts(products: IProduct[]): totalPrice,
     //Массив ID товаров в корзине
@@ -279,17 +279,25 @@ export interface ICartView {
   - event брокер событий для реализации связи между моделью данных и видом с помощью событий. (необходимые события в приложения описаны в пункте 4).
 
   ### WebLarekApi
-  На основе базового компонента api необходимо реализовать класс "WebLarekApi" имплементируя одноименный интерфейс "IWebLarekApi".
-  Данный класс реализует методы для работы с api получая данные в нужном формате, такие как "список товаров" и "товар по ID", так же в данном классе реализован метод отправки на сервер заказа.
+  На основе базового компонента *api* необходимо реализовать класс **WebLarekApi** имплементируя одноименный интерфейс **IWebLarekApi**.
+  Данный класс реализует методы для работы с *api* получая данные в нужном формате, такие как "список товаров" и "товар по ID", так же в данном классе реализован метод отправки на сервер объекта заказ описаного в интерфейсе **IOrderBody**.
 
   ### Page
-  Данный компонент основывается на базовом классе "component". Page необходим для управления интерфейсом страницы приложения, а именно:
+  Данный компонент основывается на базовом классе *component*. **Page** необходим для управления интерфейсом страницы приложения, а именно:
     - Установка количества товаров на нкопке корзины;
     - Рендера карточек товара на главной странице (в каталоге);
     - "Блокировка" страницы при открытии модального окна.
 
   ### Product - ProductCardCatalog - ProductCardCart
-  Класс Product представляет собой базовый класс отображения карточки товара в полной версии (в модальном окне товара). Расширять данный класс будут два дополнительных **ProductCardCatalog** типа **ProductCatalogView** и класс **ProductCardCart** типа **ProductCartView** соответсвенно.
+  Класс **Product** представляет собой базовый класс отображения карточки товара в полной версии (в модальном окне товара).
+  Расширять данный класс будут два дополнительных **ProductCardCatalog** типа **ProductCatalogView** и класс **ProductCardCart** типа **ProductCartView** соответсвенно.
+
+  ### Form - Order
+  Класс **Form** представляет собой базовый класс описывающий валидацию формы.
+  Класс **Order** расширят класс **Form** устанавливая поля ввода формы заказа описаной в интерфейсе **IOrderForm**.
+
+  ### Modal
+  Компонент модального окна имплементиуемый интерйесом **IModal**. Данный объект отвечает за отображение модальных окон и возможность их открыть / закрыть.
 
 ## 4. Описание событий
 

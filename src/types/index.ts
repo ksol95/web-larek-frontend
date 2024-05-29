@@ -1,4 +1,4 @@
-export type FormErrors = Partial<Record<keyof IClientForm, string>>;
+export type FormErrors = Partial<Record<keyof IOrderForm, string>>;
 export type PaymentMethod = 'online' | 'offline';
 export type totalPrice = { total: number | null };
 //Тип принимает ограниченые значения соответсвующие с названиями категорий товаров с сервера
@@ -43,7 +43,7 @@ export interface IProductModel {
   removeAllProductsFromCart(): void,
 }
 
-export interface IClientForm {
+export interface IOrderForm {
   id?: string, //На будущее
   payment: PaymentMethod,
   email: string,
@@ -57,7 +57,7 @@ export interface IOrderResult {
   error?: string,
 }
 
-export interface ICartModel extends IClientForm {
+export interface ICartModel extends IOrderForm {
   //Суммарная стоимость выбраных продуктов
   getTotalProducts(products: IProduct[]): totalPrice,
   //Массив ID товаров в корзине
@@ -72,7 +72,7 @@ export type productsInCart = {
   ]
 }
 //Объект для отправки заказа
-export interface orderBody extends IClientForm, productsInCart, totalPrice { };
+export interface IOrderBody extends IOrderForm, productsInCart, totalPrice { };
 
 //Интерфейс для подключения к API
 export interface IWebLarekApi {
@@ -81,7 +81,7 @@ export interface IWebLarekApi {
   //Получить товар по ID
   getProduct(id: string): Promise<IProduct>,
   //Метод отправки заказа от клиента на сервер
-  postOrder(data: orderBody): Promise<IOrderResult>,
+  postOrder(data: IOrderBody): Promise<IOrderResult>,
 }
 
 //Модальное окно
