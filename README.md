@@ -186,9 +186,9 @@ export interface IModal {
 }
 ```
 
-Тип для отображения товара - полная версия в модальном окне
+Тип для отображения карточки товара - полная версия в модальном окне
 ```
-export type IProductFullView = {
+export type ProductFullView = {
   title: string,
   price: totalPrice,
   description: string,
@@ -199,34 +199,40 @@ export type IProductFullView = {
 }
 ```
 
-Тип отображения товара - версия для каталога на главной странице
+Тип отображения карточки товара - версия для каталога на главной странице
 ```
-export type IProductCatalogView = Omit<IProductFullView, 'description' | 'removeFromCart' | 'addToCart'>;
+export type ProductCatalogView = Omit<ProductFullView, 'description' | 'removeFromCart' | 'addToCart'>;
+```
+
+Тип отображения карточки товара - версия для корзины
+```
+export type ProductCartView = Pick<ProductFullView, 'title' | 'price' | 'removeFromCart'> ;
+```
+
+Интерфейс события клика внутри карточки товара
+```
+interface IProductActions {
+  onClick: (event: MouseEvent) => void;
+}
 ```
 
 Отображение главной страницы
 ```
 export interface IPageView {
+  //Массив карточек с товароами
+  catalog: HTMLElement[];
   //Количество добавленых в корзину товаров
   cartCounter: number;
-  //Массив карточек с товароами
-  catalog: IProductFullView[];
   //Состояние страницы для css класса page__wrapper_locked
   locked: boolean;
 }
 ```
 
-
-Тип отображения товара - версия для корзины
-  ```
-  export type IProductCartView = Pick<IProductFullView, 'title' | 'price' | 'removeFromCart'> ;
-  ```
-
 Отображение корзины
 ```
 export interface ICartView {
   //Шаблон карточек товаров
-  products: IProductCartView[];
+  products: ProductCartView[];
   //Общая стоимость товаров
   total: totalPrice;
 }
@@ -274,13 +280,16 @@ export interface ICartView {
 
   ### WebLarekApi
   На основе базового компонента api необходимо реализовать класс "WebLarekApi" имплементируя одноименный интерфейс "IWebLarekApi".
-  данный класс реализует методы для работы с апи получая данные в нужном формате, такие как "список товаров" и "товар по ID", так же в данном классе реализован метод отправки на сервер заказа.
+  Данный класс реализует методы для работы с api получая данные в нужном формате, такие как "список товаров" и "товар по ID", так же в данном классе реализован метод отправки на сервер заказа.
 
   ### Page
   Данный компонент основывается на базовом классе "component". Page необходим для управления интерфейсом страницы приложения, а именно:
     - Установка количества товаров на нкопке корзины;
     - Рендера карточек товара на главной странице (в каталоге);
     - "Блокировка" страницы при открытии модального окна.
+
+  ### Product - ProductCardCatalog - ProductCardCart
+  Класс Product представляет собой базовый класс отображения карточки товара в полной версии (в модальном окне товара). Расширять данный класс будут два дополнительных **ProductCardCatalog** типа **ProductCatalogView** и класс **ProductCardCart** типа **ProductCartView** соответсвенно.
 
 ## 4. Описание событий
 

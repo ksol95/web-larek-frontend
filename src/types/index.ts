@@ -91,27 +91,32 @@ export interface IModal {
   loadContent(content: HTMLElement): void,
 }
 
-//Тип для отображения товара - полная версия
-export type IProductFullView = {
+//Тип для отображения карточки cssтовара - полная версия
+export type ProductFullView = {
   title: string,
   price: totalPrice,
   description: string,
   image: string,
   category: ProductCategory,
+  selected: boolean,
   addToCart?: HTMLButtonElement,
   removeFromCart?: HTMLButtonElement,
 }
-//Тип отображения товара - версия для каталога на главной странице
-export type IProductCatalogView = Omit<IProductFullView, 'description' | 'removeFromCart' | 'addToCart'>;
-//Тип отображения товара - версия для корзины
-export type IProductCartView = Pick<IProductFullView, 'title' | 'price' | 'removeFromCart'> ;
+//Тип отображения карточки товара - версия для каталога на главной странице
+export type ProductCatalogView = Omit<ProductFullView, 'description' | 'removeFromCart' | 'addToCart'>;
+//Тип отображения карточки товара - версия для корзины
+export type ProductCartView = Pick<ProductFullView, 'title' | 'price' | 'removeFromCart'> ;
+//Интерфейс события клика внутри карточки товара
+interface IProductActions {
+  onClick: (event: MouseEvent) => void;
+}
 
 //Отображение главной страницы
 export interface IPageView {
+  //Массив карточек с товарами
+  catalog: HTMLElement[];
   //Количество добавленых в корзину товаров
   cartCounter: number;
-  //Массив карточек с товарами
-  catalog: IProductFullView[];
   //Состояние страницы для css класса page__wrapper_locked
   locked: boolean;
 }
@@ -119,7 +124,7 @@ export interface IPageView {
 //Отображение корзины
 export interface ICartView {
   //Шаблон карточек товаров
-  products: IProductCartView[];
+  products: ProductCartView[];
   //Общая стоимость товаров
   total: totalPrice;
 }
