@@ -39,7 +39,7 @@ export interface IProductModel {
   addToCart(id: string): void,
   //Убрать товар из корзины
   removeProductFromCart(id: string): void,
-  //Очитсить всю корзину
+  //Очистить всю корзину
   removeAllProductsFromCart(): void,
 }
 
