@@ -5,12 +5,12 @@
 #### Структура проекта:
 
 - src/ — исходные файлы проекта
-- src/components/ — папка с JS компонентами
-- src/components/base/ — папка с базовым кодом
+- src/`Component`s/ — папка с JS компонентами
+- src/`Component`s/base/ — папка с базовым кодом
 
 #### Важные файлы:
 
-- src/pages/index.html — HTMLфайл главной страницы
+- src/MainPages/index.html — HTMLфайл главной страницы
 - src/types/index.ts — файл с типами
 - src/index.ts — точка входа приложения
 - src/scss/styles.scss — корневой файл стилей
@@ -49,226 +49,9 @@ yarn build
 
 ## Об архитектуре
 
-Взаимодействия внутри приложения происходят через события. Модели инициализируют события, слушатели событий в основном коде выполняют передачу данных компонентам отображения, а также вычислениями между этой передачей, и еще они меняют значения в моделях.
+Взаимодействия внутри приложения происходят через события. Компоненты инициализируют события, которые выполняются в основном коде, выполняя обработку данных и их передачу между компонентам отображения. Так же события отслеживают изменения данных в главной модели приложения.
 
-## 1. Типы данных
-
-Тип для получения ошибки валидации формы клиента
-
-```
-export type FormErrors = Partial<Record<keyof IOrderForm, string>>;
-```
-
-Тип для ограничения выбора значений платежного метода
-
-```
-export type PaymentMethod = 'online' | 'offline';
-```
-
-Тип вывода стоимости, для учета нулевой стоимости.
-
-```
-export type totalPrice = { total: number | null };
-```
-
-Тип принимает ограниченные значения соответствующие с названиями категорий товаров с сервера
-
-```
-export type ProductCategory =
-  'софт-скил' |
-  'хард-скил' |
-  'другое' |
-  'дополнительное' |
-  'кнопка'
-  ;
-```
-
-Тип для ограничения значений способов оплаты
-
-```
-export type PaymentMethod = 'online' | 'offline';
-```
-
-Тип данных "Товар" содержит в себе все поля приходящих с сервера.
-
-Интерфейс IProduct основан на типе Product и дополняет его свойством "selected" типа boolean.
-Предполагается что данное свойство сообщает находится ли товар в корзине или нет (по умолчанию false).
-
-```
-export type Product = {
-  id: string,
-  description: string,
-  image: string,
-  title: string,
-  category: ProductCategory,
-  price: totalPrice,
-}
-
-
-export interface IProduct extends Product{
-  selected: boolean;
-}
-```
-
-Интерфейс объекта приходящего с сервера в ответ на запрос о получении всех товаров в магазине. Содержит в себе число всех товаров и массив товаров типа IProduct
-
-```
-export interface IProductList {
-  total: number,
-  items: IProduct[],
-}
-```
-
-Интерфейс описывает модель продукта. Интерфейс содержит методы для получения/удаления данных типа IProduct, а также добавить товар в корзину посредствам установки свойства selected у товара в состояние true.
-
-```
-export interface IProductModel {
-  //Получить товары
-  setProducts(products: IProduct[]): void,
-  //Проверить добавлен ли товар в корзину
-  inCart(id: string): boolean,
-  //Вывести товары
-  getProducts(): IProduct[],
-  //Добавить товар в корзину
-  addToCart(id: string): void,
-  //Убрать товар из корзины
-  removeProductFromCart(id: string): void,
-  //Очистить всю корзину
-  removeAllProductsFromCart(): void,
-}
-```
-
-Интерфейс описывает объект "Клиент". Данный объект хранит информацию введеную пользователем в момент оформления заказа.
-
-```
-export interface IOrderForm {
-  id?: string, //На будущее
-  payment: PaymentMethod,
-  email: string,
-  phone: string,
-  address: string,
-}
-```
-
-Тип описывает объект который хранит в себе ответ от сервера после отправки заказа.
-
-```
-export interface IOrderResult {
-  id: string,
-  total: number,
-  error?: string,
-}
-```
-
-Тип описывает объект который хранит в себе ответ от сервера после отправки заказа.
-
-```
-export interface ICartModel extends IOrderForm {
-  //Суммарная стоимость выбранных продуктов
-  getTotalProducts(products: IProduct[]): totalPrice,
-  //Массив ID товаров в корзине
-  selectedProductId(product: IProduct[]): string[],
-  //Очистить данные о клиенте
-  clear(): void,
-}
-```
-
-Объект для отправки заказа
-
-```
-export type productsInCart = {
-  items: [
-    id: string,
-  ]
-}
-
-
-export interface IOrderBody extends IOrderForm, productsInCart, totalPrice { };
-
-
-```
-
-Интерфейс для подключения к API
-
-```
-export interface IWebLarekApi {
-  //Получить товары
-  getProductList(): Promise<IProductList>,
-  //Получить товар по ID
-  getProduct(id: string): Promise<IProduct>,
-  //Метод отправки заказа от клиента на сервер
-  postOrder(data: IOrderBody): Promise<IOrderResult>,
-}
-```
-
-Модальное окно
-
-```
-export interface IModal {
-  open(): void,
-  close(): void,
-  loadContent(content: IModalContent): void,
-}
-```
-
-Тип для отображения карточки товара - полная версия в модальном окне
-
-```
-export type ProductFullView = {
-  title: string,
-  price: totalPrice,
-  description: string,
-  image: string,
-  category: ProductCategory,
-  addToCart?: HTMLButtonElement,
-  removeFromCart?: HTMLButtonElement,
-}
-```
-
-Тип отображения карточки товара - версия для каталога на главной странице
-
-```
-export type ProductCatalogView = Omit<ProductFullView, 'description' | 'removeFromCart' | 'addToCart'>;
-```
-
-Тип отображения карточки товара - версия для корзины
-
-```
-export type ProductCartView = Pick<ProductFullView, 'title' | 'price' | 'removeFromCart'> ;
-```
-
-Интерфейс события клика внутри карточки товара
-
-```
-interface IProductActions {
-  onClick: (event: MouseEvent) => void;
-}
-```
-
-Отображение главной страницы
-
-```
-export interface IPageView {
-  //Массив карточек с товарами
-  catalog: HTMLElement[];
-  //Количество добавленных в корзину товаров
-  cartCounter: number;
-  //Состояние страницы для css класса page__wrapper_locked
-  locked: boolean;
-}
-```
-
-Отображение корзины
-
-```
-export interface ICartView {
-  //Шаблон карточек товаров
-  products: ProductCartView[];
-  //Общая стоимость товаров
-  total: totalPrice;
-}
-```
-
+## 1. Основные типы данных
 
 
 
@@ -286,9 +69,9 @@ export interface ICartView {
 - `get` - выполняет GET запросы к предоставленному URL.
 - `post` - выполняет запрос к API с использованием предоставленного метода(POST|PUT|DELETE) и предоставленными данными.
 
-### Базовый класс `component`
+### Базовый класс `Component`
 
-Абстрактный класс для работы с DOM. Возвращает HTML элемент.
+Абстрактный класс для создания объектов представления. Возвращает HTML элемент.
 
 `protected constructor(protected readonly container: HTMLElement)`- принимает HTML элемент "контейнер" на основе которого будет сформирован компонент
 
@@ -296,17 +79,17 @@ export interface ICartView {
 
 - `toggleClass(HTMLElement, string, boolean?)` добавление/удаление класса элементу по параметру типа boolean;
 
-- `setText(HTMLElement, unknown)` устанавливает контент переданный вторым параметром метода, переданному вторым параметром, элементу. Предварительно контент приводится к типу `string`;
+- `setText(HTMLElement, unknown)`- устанавливает контент переданный вторым параметром метода, переданному вторым параметром, элементу. Предварительно контент приводится к типу `string`;
 
-- `setDisabled(HTMLElement, boolean)` добавляет/убирает атрибут `disbled` переданному элементу;
+- `setDisabled(HTMLElement, boolean)`- добавляет/убирает атрибут `disbled` переданному элементу;
 
-- `setHidden(HTMLElement)` скрывает указанный элемент, устанавливая стиль `"display:none"`;
+- `setHidden(HTMLElement)`- скрывает указанный элемент, устанавливая стиль `"display:none"`;
 
-- `setVisible(HTMLElement)` отображает указанный элемент, удаляя стиль `"display:none"`;
+- `setVisible(HTMLElement)`- отображает указанный элемент, удаляя стиль `"display:none"`;
 
-- `setImage(HTMLImageElement, string, string?)` определяет переданому image-элементу свойство `src` и `alt` (опционально);
+- `setImage(HTMLImageElement, string, string?)`- определяет переданому image-элементу свойство `src` и `alt` (опционально);
 
-- `render(Partial<T>): HTMLElement` возвращает HTML компонент сформированный на основе переданного в конструктор класса HTML элемента. Атрибут данного метода определяется в дочерних классах.
+- `render(Partial<T>): HTMLElement`- возвращает HTML элемент сформированный на основе переданного в конструктор класса HTML элемента (шаблона). Атрибут метода принимает данные которые будут содержаться в готовом элементе.
 
 ### Базовый класс Model
 
@@ -316,7 +99,7 @@ export interface ICartView {
 Из первого объекта копирует свойства в экземпляр класса. Скопированные свойства не обязательные.
 Второй аргумент конструктора - объект событий `IEvents` (описан далее).
 
-#### Метод
+#### Метод:
 
 - `emitChanges(string, object)`- Метод создает событие изменения данных в моделе.
 
@@ -339,7 +122,7 @@ constructor() {
 - `EmitterEvent` - Интерфейс, описывающий массив `map` "название события" - "функция";
 - `IEvents`- Интерфейс, определяющий класс `EventEmitter`.
 
-#### Методы
+#### Методы:
 
 - `on(EventName,callback): void`- Записывает в массив событий обработчик - callback по ключу указанному в EventName;
 - `off(EventName,callback)`- Удаляет из массива событий обработчик с указанного события;
@@ -348,46 +131,258 @@ constructor() {
 - `offAll()` Удаляет все обработчики событий переопределяет свойство `_events` пустым массивом событий и их обработчиков.
 - `trigger<T extends object>(eventName: string, context?: Partial<T>)`- Создает триггер для указанного события.
 
-### Класс WebLarekApi 
+### Класс `WebLarekApi`
+
 Класс наследуется от базового класса `Api`, реализует необходимые методы через интерфейс `IWebLarekApi` для подключения к серверу приложения.
 
 `constructor(string, RequestInit?)`- Принимает базовый `URL` описаный в файле `./src/utils/constants.ts` и параметры запроса (необязательно) для настройки запросов к серверу.
 
-#### Методы
+#### Методы:
 
-- `getProducts(): Promise<IItemList>`- Отправляет запрос на сервер, возвращает список товаров в формате `IProductList`;
-- `getProduct(string): Promise<IItem>` Принимает индификатор товара в качестве аргемента и отпровляет запрос на сервер, для получения информации о конкретном товаре по его идентификатору. Возвращает информацию о товаре в формате `IPtoduct`;
+- `getProducts(): Promise<IProductList>`- Отправляет запрос на сервер, возвращает список товаров в формате `IProductList`;
+- `getProduct(string): Promise<IProduct>` Принимает индификатор товара в качестве аргемента и отпровляет запрос на сервер, для получения информации о конкретном товаре по его идентификатору. Возвращает информацию о товаре в формате `IPtoduct`;
 - sendOrder(IOrder): Promise<IOrderResult> Отправляет `POST` запрос на сервер для создания заказа. Принимает данные заказа в формате IOrder. Возвращает результат создания заказа в формате IOrderResult;
 
+## Model
+
+### Класс `AppStateModel`
+
+Класс наследуется от базового класса `Model`. Является общей моделью данных всего приложения. Изменения данных внутри модели генерируют события с помощью метода `emitChanges` родительского класса `Model`, имплементирует интерфейс `IAppModel`.
+
+#### Свойства
+
+- `cart: string[] = []`- Массив ID товаров добавленых в корзину;
+- `products: IProduct[] = []`- Каталог товаров;
+- `order: IOrderForm`- Информация из формы ввода адреса и выбора способа оплаты;
+- `contacts: IContactsForm`- Информация из формы ввода номера телефона и email;
+
+#### Методы
+
+- `setProducts(IProduct[])`- Записывает товары;
+- `пуеProducts()`- Возвращает массив товаров;
+- `addToCart(string)`- Добавить товар в корзину по ID;
+- `removeProductFromCart(string)`- Удаляет товар по ID;
+- `getCart()`- Возвращает товары из корзины в виде массива объектов;
+- `getTotalPrice()`- Возвращает суммарную стоимость товаров добавленных в корзину;
+- `getProductsCount()`- Возвращает общее количество товаров;
+- `getCountCart()`- Возвращает количество товаров в корзине;
+- `removeAllProductsFromCart()`- Очищает корзину.
+
+## View
+
+### Класс `MainPage`
+Класс наследуется от базового класса `Component`, описывает представление главной страницы. 
 
 
-## Классы Model
+`constructor(HTMLElement, IEvents)`- Конструктор класса, принимающий контейнерный элемент страницы и объект событий. Вызывает конструктор родительского класса `Component` и инициализирует элементы страницы.
 
-## Классы View
+#### Свойства
+
+- `#_counter: HTMLElement`- счётчик корзины;
+- `#_catalog HTMLElement`- контейнер для отображения карточек товара;
+- `#_wrapper HTMLElement`- элемент обёртки;
+- `#_cartButton HTMLElement`- элемент кнопки открытия корзины;
+
+#### Методы
+
+- `set counter`- устанавливает счётчик товаров в корзине;
+- `set catalog`- выводит в контейнер `_catalog` список товаров;
+- `set locked`- блокирует/разблокирует прокрутку страницы по средствам установки специального класса элементу `_wrapper`;
+
+
+### Класс `ProductCard`
+
+Класс `ProductCard` наследуется от базового класса `Component`, передавая родительскому классу в дженерик тип `ProductView`. Формирует представление товара.
+
+Для обработки событий внутри карточки товара (представлении) используется интерфейс `IProductActions: onClick: (event: MouseEvent): void`.
+
+`constructor( HTMELement, IProductActions?)`- Конструктор получает два параметра: HTML-шаблон (container) и функцию, которая будет установлена на событие 'click' по кнопке внутри представления.
+Конструктор родительского класса `Component` формирует объект `this.container` на основе полученого HTML-шаблона, далее инициализирует свойства класса.
+
+#### Свойства:
+
+Свойства класса содержут в себе DOM узлы из переданого HTML-шаблона.
+
+##### Общие, для всех шаблонов карточек, свойства
+- `#_title`- HTMLElement с селекторм '.card__title';
+- `#_price`- HTMLElement с селекторм '.card__price';
+##### Не отображается только в каталоге
+- `#_button`- HTMLButtonElement с селекторм '.card__button';
+##### Не отображается в корзине
+- `#_category`- HTMLElement с селекторм '.card__category';
+- `#_description`- HTMLElement с селекторм '.card__text';
+- `#_image`- HTMLElement с селекторм '.card__button';
+##### Отображается только в корзине
+- `#_index`- HTMLElement с селекторм '.basket__item-index', используется только с шаблоном карточки товара в корзине;
+
+#### Геттеры и Сеттеры:
+
+- `set/get id`;
+- `set/get title`;
+- `set/get image`;
+- `set description`;
+- `set inMarket` - В случае если устанавливается значение `true`, запускается метод `offTheMarket`;
+- `set inCart(boolean)` - Устанавливается текст на кнопке в модальном окне товара, Удалить/Добавить товар в корзину;
+- `set/get price` - В случае отсутсвия цены (NULL) необходимо вывести слово "Бесценно";
+- `set/get category` - Данный метод подставляет класс модификатор элементу `_category` соответсвующей его значению; 
+
+#### Метод
+
+- `offTheMarket` - Метод отключает кнопку "Купить" и устанавливает на ней текст "Недоступно", необходимо для товаров без стоимости;
+
+
+### Класс `Modal`
+Класс `Modal` расширяет базовый класс `Component`, являясь предстовлением модального окна.
+
+#### Свойства:
+
+- `#_closeButton: HTMLButtonElement`- кнопка закрытия модального окна
+- `#_content: HTMLElement`- содержимое модального окна
+
+`constructor(HTMElement, IEvents)`- Вызывает конструктор родительского класса `Component` и инициализирует элементы модального окна. Устанавливает обработчики событий для кнопки закрытия, самого модального окна и его содержимого.
+
+#### Методы
+- `set content(HTMLElement)`- устанавливает содержимое модального окна;
+- `open()`- Открывает модальное окно, добавляя ему класс `modal_active` и инициирует событие `modal:open`;
+- `close()`- Закрывает модальное окно, удаляя у него класс `modal_active`, очищает содержимое и инициирует событие `"modal:close"`;
+- `render()`- Переопределённый родительский метод отрисовки модального окна. Вызывает метод `open()` после отрисовки.
+
+
+
+### Класс `Cart`
+Класс `Cart` расширяет базовый класс `Component`. Описывает представление корзины товаров.
+
+### Свойства:
+
+- `#_list: HTMElement`- Элемент списка товаров в корзине.
+- `#_total: HTMLElement`- Элемент отображения общей суммы заказа.
+- `#_button: HTMLElelemnt`- Кнопка оформления заказа.
+
+`constructor(HTMElement, IEvents)`- Вызывает конструктор родительского класса `Component` и инициализирует элементы шаблона корзины товаров. Устанавливает обработчик события для кнопки оформления заказа.
+
+- `set products(HTMLElement[])`- Добавляет товары в список корзины. При пустом списке товаров, выводит соответствующее сообщение;
+- `set total(number)`- Устанавливает общую сумму заказа.
+
+
+
+
+### Класс `Form` 
+Класс `Form` Расширяет базовый класс `Component`. Описывает представление форм в приложении.
+
+
+#### Свойства:
+
+- `#_submit: HTMLButtonElement`- Кнопка отправки формы.
+- `#_errors: HTMLElement`- Элемент для отображения ошибок формы.
+
+`constructor(HTMLFormElement, IEvents)`- Вызывает конструктор родительского класса `Component` и инициализирует элементы формы. Устанавливает обработчики событий для ввода данных и отправки формы.
+
+#### Методы:
+
+- `onInputChange(keyof T, string)`- Обрабатывает изменения в полях ввода формы и генерирует событие с информацией о измененном поле и его значении.
+- `set valid(boolean)`- блокирует/разблокирует кнопку отправки
+- `set errors(string)`- устанавливает ошибку в элемент ошибки
+- `render(Partial<T> & IFormState)`- Метод для рендеринга формы. Вызывает родительский метод render для установки состояния формы, а затем применяет значения состояния к элементам формы.
+
+
+### Класс `OrderForm`
+Класс `OrderForm` Расширяет класс `Form`. Описывает представление формы ввода адреса и выбора метода оплаты.
+
+#### Свойства
+-`#_paymentButton`- Массив кнопок выбора способа оплаты.
+-`inputs: IOrderForm` - Объект со значеними введенных в форму;
+-`formErrors: OrderFormErrors` - Объект с сообщениями об ошибках валидации полей формы;
+
+`constructor(HTMLFormElement, IEvents)`- Вызывает конструктор родительского класса `Form`, передавая ему форму и объект событий, а так же инициализирует кнопки выбора метода оплаты.
+
+#### Методы:
+- `set address(string)`;
+- `set payment(string)`;
+- `#paymentChoice(HTMLButtonElement)` - Устанавливает выбраный метод оплаты;
+- `setOrderField(keyof IOrderForm, string)` - Устанавливает значения полей проверяя их на валидность, в случае если форма валидна, инициализирует событие "ORDER_READY";
+- `validateOrder()` - Метод валидации полей формы.
+
+
+
+### Класс `ContactsForm`
+Класс `ContactsForm` Расширяет класс `Form`. Описывает представление формы ввода номпера телефона и email пользователя.
+
+#### Свойства
+-`#_paymentButton`- Массив кнопок выбора способа оплаты.
+-`inputs: IContactsForm` - Объект со значеними введенных в форму;
+-`formErrors: ContactsFormErrors` - Объект с сообщениями об ошибках валидации полей формы;
+
+`constructor(HTMLFormElement, IEvents)`- Вызывает конструктор родительского класса `Form`, передавая ему форму и объект событий.
+
+#### Методы:
+- `set phone(string)`;
+- `set email(string)`;
+- `#paymentChoice(HTMLButtonElement)` - Устанавливает выбраный метод оплаты;
+- `setContactsField(keyof IContactsForm, string)` - Устанавливает значения полей проверяя их на валидность, в случае если форма валидна, инициализирует событие "CONTACTS_READY";
+- `validateContacts()` - Метод валидации полей формы.
+
+
+
+
+### Класс `OrderSuccess`
+
+Класс `OrderSuccess` расширяет класс `Component`. Реализует представление успещного выполнения отправки заказа на сервер.
+
+#### Свойства:
+- `_title:`- HTMLElement Заголовок;
+- `_description:`- HTMLElement Текст из шаблона представления выводящий сообщения об оплате;
+- `_buttonClose:`- HTMLButtonElement Кнопка из шаблона представления.
+
+### Метод
+- `set total(number)`- Заполняет сообщение в элементе _description сообщением об успешном заказе и общей сумме заказа.
+
 
 ## 4. Описание событий
 
-События хранятся в объекте - "events" описаном в файле "./utils/constants.ts".
+События хранятся в объекте - "eventList" описаном в файле "./utils/constants.ts".
 
 ```
-export enum events {
-  MODAL_OPEN = 'modal:open',
-  MODAL_CLOSE = 'modal:close',
+export const eventList = {
+  //Изменение в списке продуктов
+  MODEL_CHANGE: 'product:change',
+  //Открыть превью товара
+  PRODUCT_PREVIEW: 'prduct:preview',
+  //Добавление в корзину
+  PRODUCT_ADD: 'prduct:addToCart',
+  //Удаление из корзины
+  PRODUCT_REMOVE: 'prduct:removeFromCart',
+  //Очистить всю корзину
+  PRODUCT_REMOVE_ALL: 'prduct:removeAllFromCart',
 
-
-  //Изменение статуса "в корзине"
-  PRODUCT_CHANGE = 'product:change',
-  //Открыть модальное окно с подробным описанием товара
-  PRODUCT_OPEN = 'product:open',
   //Событие открытия окна с корзиной
-  CART_OPEN = 'cart:open',
-  //Открыть модальное окно с формой данных о клиенте
-  CLIENT_OPEN = 'client:open',
-  //Отправка формы заказа
-  CLIENT_SUBMIT = 'client:submit',
+  CART_OPEN: 'cart:open',
+  //Оформление заказа
+  CART_ORDER: 'cart:order',
+  //Изменения корзины
+  CART_CHANGE: 'cart:change',
+
   //Выбор типа оплаты
-  CLIENT_PAYMENT_TYPE = 'client:changePaymentType',
-  //Валидация формы
-  FORM_ERRORS_CHANGE = 'formErrors:change',
+  ORDER_PAYMENT_TYPE: 'order:changePaymentType',
+  //Изменение в инпуте "адрес"
+  ORDER_ADDRESS_CHANGE: 'order.address:change',
+  //Ошибка формы заказа
+  ORDER_ERROR: 'orderFormErrors:change',
+  //Форма заказа без ошибок
+  ORDER_READY: 'orderFormErrors:ready',
+  //Отправка формы ORDER
+  ORDER_SUBMIT: 'order:submit',
+
+  //Изменение в инпуте "адрес"
+  CONTACTS_INPUTS_CHANGE: /^contacts\..*:change/,
+  //Ошибка формы контактов
+  CONTACTS_ERROR: 'contactsFormErrors:change',
+  //Форма контакты без ошибок
+  CONTACTS_READY: 'contactsFormErrors:ready',
+  //Отправка формы ORDER
+  CONTACTS_SUBMIT: 'contacts:submit',
+  
+  //Открытие/закрытие любого модельного окна
+  MODAL_OPEN: 'modal:open',
+  MODAL_CLOSE: 'modal:close',
 }
 ```
