@@ -2,7 +2,6 @@ import { IOrderForm, IContactsForm } from './view/formsView';
 
 export type OrderFormErrors = Partial<Record<keyof IOrderForm, string>>;
 export type ContactsFormErrors = Partial<Record<keyof IContactsForm, string>>;
-// export type PaymentMethod = 'cash' | 'card';
 export type totalPrice = { total: number | null };
 
 //Тип принимает ограниченые значения соответсвующие с названиями категорий товаров с сервера
@@ -13,6 +12,7 @@ export type ProductCategory =
 	| 'дополнительное'
 	| 'кнопка';
 
+//Интерфейс описывает товар
 export interface IProduct {
 	id: string;
 	description: string;
@@ -21,12 +21,12 @@ export interface IProduct {
 	category: ProductCategory;
 	price: number | null;
 }
-
+//Массив товаров приходящий с сервера
 export interface IProductList {
 	total: number;
 	items: IProduct[];
 }
-
+//Интерфейс модели данных всего приложения
 export interface IAppModel {
 	order: IOrderForm | null;
 	contacts: IContactsForm | null;
