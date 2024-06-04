@@ -29,7 +29,6 @@ export class ProductCard extends Component<ProductView> implements ProductView {
 		this._button = this.container.querySelector<HTMLButtonElement>(
 			selector.button
 		);
-		console.log(this.container);
 		//Добовляем событие клика на кнопку в карточке товара, или на саму карточку
 		if (actions?.onClick) {
 			if (this._button) {
