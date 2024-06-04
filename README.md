@@ -4,18 +4,19 @@
 
 #### Структура проекта:
 
-- src/ — исходные файлы проекта
-- src/`Component`s/ — папка с JS компонентами
-- src/`Component`s/base/ — папка с базовым кодом
+- `src/` — исходные файлы проекта;
+- `src/Components/` — папка с JS компонентами;
+- `src/Components/base/` — папка с базовым кодом.
 
 #### Важные файлы:
 
-- src/MainPages/index.html — HTMLфайл главной страницы
-- src/types/index.ts — файл с типами
-- src/index.ts — точка входа приложения
-- src/scss/styles.scss — корневой файл стилей
-- src/utils/constants.ts — файл с константами
-- src/utils/utils.ts — файл с утилитами
+- `src/pages/index.html` — HTMLфайл главной страницы;
+- `src/types/index.ts` — файл с типами;
+- `src/types/view/` — Типы представления;
+- `src/index.ts` — точка входа приложения;
+- `src/scss/styles.scss` — корневой файл стилей;
+- `src/utils/constants.ts` — файл с константами;
+- `src/utils/utils.ts` — файл с утилитами.
 
 ## Установка и запуск
 
