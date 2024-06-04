@@ -14,14 +14,13 @@ export class AppModel extends Model<IAppModel> implements IAppModel {
     address: '',
     payment: <string>settings.paymentMethods_default,
   };
-
   contacts: IContactsForm = {
     phone: '',
     email: '',
   };
 
   setProducts(products: IProduct[]) {
-    this.products = products;
+    if (this.products) this.products = products;    
     this.events.emit(eventList.MODEL_CHANGE);
   }
   getProducts() {
@@ -39,10 +38,8 @@ export class AppModel extends Model<IAppModel> implements IAppModel {
       const index = this.cart.findIndex((i) => i === id);
       //Удаляем из массива по найденому индексу
       this.cart.splice(index, 1);
-      //Обновляем отображение модели (Обновить счётчик)
-      this.emitChanges(eventList.MODEL_CHANGE);
-      //Открываем обновленную корзину
-      this.emitChanges(eventList.CART_OPEN);
+      //Обновляем отображение корзины (Обновить счётчик)
+      this.emitChanges(eventList.CART_CHANGE);
     }
   }
 

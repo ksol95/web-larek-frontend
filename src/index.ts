@@ -79,7 +79,8 @@ event.on(eventList.MODEL_CHANGE, () => {
   //выводим получиный каталог на главную страницу
   //а так же обновляем счётчик корзины
   mainPage.catalog = catalog;
-  mainPage.counter = appData.getCountCart();
+  //Событие обновления корзины товаров
+  event.emit(eventList.CART_CHANGE);
 })
 
 //Открытие модального окна с подробным описанием товара
@@ -107,11 +108,16 @@ event.on(eventList.PRODUCT_PREVIEW, (product: ProductView) => {
 //Событие клика по кнопке "Добавить в корзину" в карточке товара
 event.on(eventList.PRODUCT_ADD, (product: ProductView) => {
   appData.addToCart(product.id);
-  modal.close();
+    //Вызываем события открытия карточки товара для обновленяя ее содержимого после добавления в корзину
+    event.emit(eventList.PRODUCT_PREVIEW, product);
 })
 
 //Событие клика по кнопке "Удалить из корзины" в карточке товара
-event.on(eventList.PRODUCT_REMOVE, (product: ProductView) => appData.removeProductFromCart(product.id))
+event.on(eventList.PRODUCT_REMOVE, (product: ProductView) => {
+  appData.removeProductFromCart(product.id);
+  //Вызываем события открытия карточки товара для обновленяя ее содержимого после удаления
+  event.emit(eventList.PRODUCT_PREVIEW, product);
+})
 
 //Событие "открыть корзину". Данное событие иницализирует mainPage
 //В конструкторе класса кнопке корзины добавляется соотвествующий обработчик клика
@@ -242,6 +248,8 @@ event.on(eventList.CONTACTS_SUBMIT, () => {
     });
 })
 
+//Обновление корзины товаров
+event.on(eventList.CART_CHANGE, () => mainPage.counter = appData.getCountCart())
 
 //Блокируем страницу при каждом MODAL_OPEN событии
 event.on(eventList.MODAL_OPEN, () => {
