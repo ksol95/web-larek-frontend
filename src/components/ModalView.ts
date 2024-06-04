@@ -1,13 +1,10 @@
+import { IModalData } from '../types/view/modalView';
 import { Component } from './base/component';
 import { ensureElement } from '../utils/utils';
 import { IEvents } from './base/events';
 import { eventList, settings } from '../utils/constants';
 
 const selector = settings.modalTemplateSelectors;
-
-interface IModalData {
-	content: HTMLElement;
-}
 
 export class Modal extends Component<IModalData> {
 	protected _closeButton: HTMLButtonElement;
@@ -29,6 +26,11 @@ export class Modal extends Component<IModalData> {
 		this._content.addEventListener('click', (event) => event.stopPropagation());
 	}
 
+	//Обработчик нажатия клавиши Esc
+	escHandle = (event: KeyboardEvent) => {
+		if (event.key === "Escape") this.close()
+	}
+
 	set content(value: HTMLElement) {
 		this._content.replaceChildren(value);
 	}
@@ -37,13 +39,17 @@ export class Modal extends Component<IModalData> {
 		this.opening = true;
 		this.toggleClass(this.container, selector.activeModal);
 		this.events.emit(eventList.MODAL_OPEN_CLOSE);
+		//Добавляем слушателя клавишь
+		document.addEventListener('keydown', this.escHandle);
 	}
 
-	close() {
+	close = () => {
 		this.opening = false;
 		this.toggleClass(this.container, selector.activeModal);
 		this.content = null;
 		this.events.emit(eventList.MODAL_OPEN_CLOSE);
+		//Удаляем слушателя клавиш
+		document.removeEventListener('keydown', this.escHandle);
 	}
 
 	render(data: IModalData): HTMLElement {
