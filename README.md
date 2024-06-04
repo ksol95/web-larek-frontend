@@ -196,8 +196,6 @@ export interface IPageView {
   catalog: HTMLElement[];
   //Количество добавленных в корзину товаров
   cartCounter: number;
-  //Состояние страницы для css класса page__wrapper_locked
-  locked: boolean;
 }
 ```
 
@@ -237,6 +235,10 @@ export interface IContactsForm {
 export interface IFormState {
   valid: boolean;
   errors: string[];
+}
+
+export type PaymentType = {
+	type: string;
 }
 ```
 
@@ -558,9 +560,8 @@ export const eventList = {
   //Отправка формы ORDER
   CONTACTS_SUBMIT: 'contacts:submit',
  
-  //Открытие/закрытие любого модельного окна
-  MODAL_OPEN: 'modal:open',
-  MODAL_CLOSE: 'modal:close',
+	//Открытие/закрытие любого модельного окна
+	MODAL_OPEN_CLOSE: 'modal:open/close',
 }
 ```
 

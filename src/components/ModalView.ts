@@ -12,6 +12,7 @@ interface IModalData {
 export class Modal extends Component<IModalData> {
 	protected _closeButton: HTMLButtonElement;
 	protected _content: HTMLElement;
+	opening = false;
 
 	constructor(container: HTMLElement, protected events: IEvents) {
 		super(container);
@@ -22,7 +23,8 @@ export class Modal extends Component<IModalData> {
 		);
 		this._content = ensureElement<HTMLElement>(selector.content, this.container);
 
-		this._closeButton.addEventListener('click', this.close.bind(this));
+		this._closeButton.addEventListener('click', () => this.close.bind(this));
+
 		this.container.addEventListener('click', this.close.bind(this));
 		this._content.addEventListener('click', (event) => event.stopPropagation());
 	}
@@ -32,17 +34,21 @@ export class Modal extends Component<IModalData> {
 	}
 
 	open() {
-		this.container.classList.add(selector.open);
-		this.events.emit(eventList.MODAL_OPEN);
+		this.opening = true;
+		this.toggleClass(this.container, selector.activeModal);
+		this.events.emit(eventList.MODAL_OPEN_CLOSE);
 	}
 
 	close() {
-		this.container.classList.remove(selector.open);
+		this.opening = false;
+		this.toggleClass(this.container, selector.activeModal);
 		this.content = null;
-		this.events.emit(eventList.MODAL_CLOSE);
+		this.events.emit(eventList.MODAL_OPEN_CLOSE);
 	}
 
 	render(data: IModalData): HTMLElement {
+		if (this.opening) this.close()
+
 		super.render(data);
 		this.open();
 		return this.container;

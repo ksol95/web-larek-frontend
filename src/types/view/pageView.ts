@@ -4,6 +4,4 @@ export interface IPageView {
 	catalog: HTMLElement[];
 	//Количество добавленых в корзину товаров
 	cartCounter: number;
-	//Состояние страницы для css класса page__wrapper_locked
-	locked: boolean;
 }

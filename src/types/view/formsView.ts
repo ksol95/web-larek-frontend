@@ -12,3 +12,7 @@ export interface IFormState {
 	valid: boolean;
 	errors: string[];
 }
+
+export type PaymentType = {
+	type: string;
+}

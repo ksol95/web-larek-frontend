@@ -65,9 +65,7 @@ export class ProductCard extends Component<ProductView> implements ProductView {
 			//Обнуляем классы модификаторы в шаблоне
 			this._category.className = selector.category.replace(/./, '');
 			//Добавляем класс модификатор соответствующий имени категории (constans.ts -> settings -> сategoryType)
-			this._category.classList.add(
-				`${settings.categoryClass}${settings.сategoryType[value]}`
-			);
+			this.toggleClass(this._category,`${settings.categoryClass}${settings.сategoryType[value]}`, true);
 		}
 	}
 
@@ -109,7 +107,6 @@ export class ProductCard extends Component<ProductView> implements ProductView {
 			this._button,
 			status ? text.deleteFromCart_btn : text.addToCart_btn
 		);
-		// this._button.disabled = status;
 	}
 
 	set index(value: number) {
@@ -117,7 +114,7 @@ export class ProductCard extends Component<ProductView> implements ProductView {
 	}
 	offTheMarket(): void {
 		this.setText(this._button, text.offTheMarket);
-		this._button.disabled = true;
+		this.setDisabled(this._button, true);
 	}
 
 }

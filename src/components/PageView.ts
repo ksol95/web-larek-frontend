@@ -34,11 +34,7 @@ export class MainPage extends Component<IPageView> {
 		this._catalog.replaceChildren(...products);
 	}
 
-	set locked(value: boolean) {
-		if (value) {
-			this._wrapper.classList.add(settings.pageLockedClass);
-		} else {
-			this._wrapper.classList.remove(settings.pageLockedClass);
-		}
+	togglePageLock() {
+		this.toggleClass(this._wrapper, settings.pageLockedClass);
 	}
 }

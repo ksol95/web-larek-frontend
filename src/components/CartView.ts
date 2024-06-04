@@ -37,10 +37,10 @@ export class Cart extends Component<ICartView> {
 			//Выводим товары в список если элементы пришли
 			//и включаем кнопку "Оформить заказ"
 			this._list.replaceChildren(...product);
-			this._button.disabled = false;
+			this.toggleButton(false);
 		} else {
 			//Иначе, отключаем кнопку "Оформить заказ"
-			this._button.disabled = true;
+			this.toggleButton(true);
 			//Рисуем текст пустой корзины в списке товаров
 			this._list.replaceChildren(
 				createElement<HTMLLIElement>('li', {
@@ -55,5 +55,9 @@ export class Cart extends Component<ICartView> {
 		this.setText(this._total, `
 			${total.toString().replace(/(\d)(?=(\d{3})+(\D|$))/g, '$1 ')} ${text.currency}
 		`);
+	}
+
+	toggleButton(state: boolean) {
+		this.setDisabled(this._button, state);
 	}
 }

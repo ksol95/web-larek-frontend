@@ -2,7 +2,7 @@ import './scss/styles.scss';
 //Типы и интерфейсы
 import { IOrderBody } from './types'
 import { ProductView } from './types/view/productView'
-import { IOrderForm, IContactsForm } from './types/view/formsView'
+import { IOrderForm, IContactsForm, PaymentType } from './types/view/formsView'
 //Компоненты
 import { EventEmitter } from './components/base/events';
 import { WebLarekApi } from './components/WebLarekApi';
@@ -53,9 +53,7 @@ api.getProductList()
   //В случае успеха загружаем полученные данные в модель
   //после загрузки данных в модель, инициализируется событие "MODEL_CHANGE"
   .then(res => appData.setProducts(res.items))
-  .catch(err => {
-    console.error(err);
-  });
+  .catch(console.error);
 
 
 //Событие изменения продука
@@ -108,7 +106,6 @@ event.on(eventList.PRODUCT_PREVIEW, (product: ProductView) => {
       inMarket: (product.price === null), //Если у товара нет стоимости, то снять с продажи
     })
   });
-  mainPage.locked = true;
 })
 
 //Событие клика по кнопке "Добавить в корзину" в карточке товара
@@ -165,7 +162,7 @@ event.on(eventList.CART_ORDER, () => {
 
 //При выборе метода оплаты, записываем выбранный метод
 //(выбранный метод по умолчанию находиться в объекте настроек paymentMethods_default)
-event.on(eventList.ORDER_PAYMENT_TYPE, (payment) => orderFormView.inputs.payment = Object.values(payment)[0])
+event.on(eventList.ORDER_PAYMENT_TYPE, (payment: PaymentType) => orderFormView.inputs.payment = payment.type);
 
 // Изменилось одно из полей в форме заказа
 event.on(eventList.ORDER_INPUTS_CHANGE, (data: { field: keyof IOrderForm, value: string }) => {
@@ -183,7 +180,7 @@ event.on(eventList.ORDER_READY, () => orderFormView.valid = true);
 ///////////////////////////////////////////////////////////////////
 //Событие "Открытие формы контакты"
 event.on(eventList.ORDER_SUBMIT, () => {
-  //Записываем в модель данные о заказе
+  //Записываем в модель данные о заказе  
   appData.order = orderFormView.inputs;
 
   modal.render({
@@ -223,10 +220,11 @@ event.on(eventList.CONTACTS_SUBMIT, () => {
     items: [...appData.cart],
     total: appData.getTotalPrice(),
   }
-  console.log(orderBody);
   //Отправить через API 
   api.postOrder(orderBody)
     .then(res => {
+      //Вывод в консоль ответ от сервера
+      console.log(res);
       //Очищаем корзину
       appData.removeAllProductsFromCart();
       //Оформляем ответ от сервераo в положительном случае
@@ -243,20 +241,13 @@ event.on(eventList.CONTACTS_SUBMIT, () => {
         }),
       });
     })
-    .catch(err => {
-      console.error(err);
-    });
+    .catch(console.error);
 })
 
 //Обновление счётчика товаров в корзине
 event.on(eventList.CART_CHANGE, () => mainPage.counter = appData.getCountCart())
 
-//Блокируем страницу при каждом MODAL_OPEN событии
-event.on(eventList.MODAL_OPEN, () => {
-  mainPage.locked = true;
-})
-
-//Разблокируем страницу при каждом MODAL_CLOSE событии
-event.on(eventList.MODAL_CLOSE, () => {
-  mainPage.locked = false;
+//Блокируем/Разблокируем страницу
+event.on(eventList.MODAL_OPEN_CLOSE, () => {
+  mainPage.togglePageLock();
 })

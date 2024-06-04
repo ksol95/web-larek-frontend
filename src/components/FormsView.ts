@@ -1,4 +1,4 @@
-import { IOrderForm, IContactsForm, IFormState } from '../types/view/formsView';
+import { IOrderForm, IContactsForm, IFormState, PaymentType } from '../types/view/formsView';
 import { Component } from './base/component';
 import { IEvents } from './base/events';
 import { eventList, settings } from '../utils/constants';
@@ -7,6 +7,7 @@ import { OrderFormErrors, ContactsFormErrors } from '../types';
 
 const selectorOrder = settings.orderForm;
 const selectorContacts = settings.contactsForm;
+const text = settings.text;
 
 export class Form<T> extends Component<IFormState> {
   protected _submit: HTMLButtonElement;
@@ -38,11 +39,11 @@ export class Form<T> extends Component<IFormState> {
     this.events.emit(`${this.container.name}.${String(field)}:change`, {
       field,
       value,
-    });
+    });    
   }
 
   set valid(value: boolean) {
-    this._submit.disabled = !value;
+    this.setDisabled(this._submit, !value);
   }
 
   set errors(value: string) {
@@ -76,8 +77,8 @@ export class OrderForm extends Form<IOrderForm> {
       //Делаем так, что бы одновремено была активнат только одна кнопка
       this._paymentButtons.forEach((button) => {
         button.addEventListener('click', () => {
-          this.events.emit(eventList.ORDER_PAYMENT_TYPE, {
-            paymentType: this.paymentChoice(button),
+          this.events.emit(eventList.ORDER_PAYMENT_TYPE, <PaymentType>{
+            type: this.paymentChoice(button),
           });
         });
       });
@@ -93,18 +94,22 @@ export class OrderForm extends Form<IOrderForm> {
   }
 
   set payment(method: string) {
-    this._paymentButtons
-      .find((button) => button.name === method)
-      .classList.toggle(selectorOrder.paymentBtnActive, true);
+    this._paymentButtons.forEach((button) => {
+      this.toggleClass(button, selectorOrder.paymentBtnActive, false);
+    });
+    this.toggleClass(
+      this._paymentButtons.find((button) => button.name === method),
+      selectorOrder.paymentBtnActive, true
+    );
   }
 
   protected paymentChoice(button: HTMLButtonElement): string {
     //Снимаем со всех кнопок active
     this._paymentButtons.forEach((button) => {
-      button.classList.toggle(selectorOrder.paymentBtnActive, false);
+      this.toggleClass(button, selectorOrder.paymentBtnActive, false);
     });
     //Ставим active на кнопку по которой произвели клик
-    button.classList.toggle(selectorOrder.paymentBtnActive, true);
+    this.toggleClass(button, selectorOrder.paymentBtnActive, true);
     //Запоминаем выбраный метод оплаты
     return <string>button.name;
   }
@@ -119,7 +124,7 @@ export class OrderForm extends Form<IOrderForm> {
   validateOrder() {
     const errors: typeof this.formErrors = {};
     if (!this.inputs.address) {
-      errors.address = 'Необходимо указать адрес';
+      errors.address = text.err.emptyAddress;
     }
     this.formErrors = errors;
     this.events.emit(eventList.ORDER_ERROR, this.formErrors);
@@ -166,10 +171,10 @@ export class ContactsForm extends Form<IContactsForm> {
   validateContacts() {
     const errors: typeof this.formErrors = {};
     if (!this.inputs.phone) {
-      errors.phone = 'Необходимо указать телефон';
+      errors.phone = text.err.emptyPhone;
     }
     if (!this.inputs.email) {
-      errors.phone = 'Необходимо указать email';
+      errors.phone = text.err.emptyEmail;
     }
     this.formErrors = errors;
     this.events.emit(eventList.CONTACTS_ERROR, this.formErrors);

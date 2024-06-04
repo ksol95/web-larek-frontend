@@ -53,7 +53,7 @@ export const settings = {
 		closeBtn: '.modal__close',
 		content: '.modal__content',
 		//Класс модификатор открытого окна
-		open: 'modal_active',
+		activeModal: 'modal_active',
 	},
 
 	//Селекторы шаблона представления сообщения об успешной отправки заказа
@@ -108,6 +108,11 @@ export const settings = {
 		offTheMarket: 'Недоступно',
 		cartEmpty: 'Корзина пуста',
 		success: 'Списано',
+		err:{
+			emptyAddress: 'Необходимо указать адрес',
+			emptyPhone: 'Необходимо указать телефон',
+			emptyEmail: 'Необходимо указать email',
+		}
 	},
 };
 //Список отслеживаемых событий
@@ -154,6 +159,5 @@ export const eventList = {
 	CONTACTS_SUBMIT: 'contacts:submit',
 
 	//Открытие/закрытие любого модельного окна
-	MODAL_OPEN: 'modal:open',
-	MODAL_CLOSE: 'modal:close',
+	MODAL_OPEN_CLOSE: 'modal:open/close',
 };
