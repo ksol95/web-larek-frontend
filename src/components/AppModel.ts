@@ -29,7 +29,8 @@ export class AppModel extends Model<IAppModel> implements IAppModel {
   addToCart(id: string) {
     if (!this.cart.includes(id)) {
       this.cart.push(id);
-      this.emitChanges(eventList.MODEL_CHANGE, this.products);
+      //Сообщаем об изменении в корзине
+      this.emitChanges(eventList.CART_CHANGE, this.products);
     }
   }
   removeProductFromCart(id: string) {
@@ -38,7 +39,7 @@ export class AppModel extends Model<IAppModel> implements IAppModel {
       const index = this.cart.findIndex((i) => i === id);
       //Удаляем из массива по найденому индексу
       this.cart.splice(index, 1);
-      //Обновляем отображение корзины (Обновить счётчик)
+      //Сообщаем об изменении в корзине (Обновить счётчик на главной странице)
       this.emitChanges(eventList.CART_CHANGE);
     }
   }
@@ -57,7 +58,6 @@ export class AppModel extends Model<IAppModel> implements IAppModel {
         totalPrice += product.price;
       } else return;
     }
-
     return totalPrice;
   }
 
@@ -71,5 +71,7 @@ export class AppModel extends Model<IAppModel> implements IAppModel {
 
   removeAllProductsFromCart() {
     this.cart = [];
+    //Сообщаем об изменении в корзине (Обновить счётчик на главной странице)
+    this.emitChanges(eventList.CART_CHANGE);
   }
 }

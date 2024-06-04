@@ -543,7 +543,7 @@ export const eventList = {
   //Выбор типа оплаты
   ORDER_PAYMENT_TYPE: 'order:changePaymentType',
   //Изменение в инпуте "адрес"
-  ORDER_ADDRESS_CHANGE: 'order.address:change',
+  ORDER_INPUTS_CHANGE: /^order\..*:change/,
   //Ошибка формы заказа
   ORDER_ERROR: 'orderFormErrors:change',
   //Форма заказа без ошибок

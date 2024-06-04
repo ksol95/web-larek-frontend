@@ -10,18 +10,18 @@ export class MainPage extends Component<IPageView> {
 	protected _counter: HTMLElement;
 	protected _catalog: HTMLElement;
 	protected _wrapper: HTMLElement;
-	protected _cartButton: HTMLElement;
+	protected _cartButton: HTMLButtonElement;
 
 	constructor(container: HTMLElement, protected events: IEvents) {
 		super(container);
 
-		this._counter = ensureElement(selector.counter);
-		this._catalog = ensureElement(selector.catalog);
-		this._wrapper = ensureElement(selector.wrapper);
-		this._cartButton = ensureElement(selector.cart);
+		this._counter = ensureElement(selector.counter, this.container);
+		this._catalog = ensureElement(selector.catalog, this.container);
+		this._wrapper = ensureElement(selector.wrapper, this.container);
+		this._cartButton = ensureElement<HTMLButtonElement>(selector.cart, this.container);
 
 		this._cartButton.addEventListener('click', () => {
-			//Событие клика по кнопке корзины
+			//Событие клика по кнопке корзины товаров на главной странице
 			this.events.emit(eventList.CART_OPEN);
 		});
 	}

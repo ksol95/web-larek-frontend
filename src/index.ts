@@ -30,16 +30,18 @@ const cart_Template = cloneTemplate(ensureElement<HTMLTemplateElement>(selectors
 //Шаблон заказа
 const orderForm_Template = cloneTemplate<HTMLFormElement>(ensureElement<HTMLTemplateElement>(selectors.order));
 const contactsForm_Template = cloneTemplate<HTMLFormElement>(ensureElement<HTMLTemplateElement>(selectors.contacts));
-//Контейнеры для вывода верстки
-const catalog = ensureElement<HTMLElement>(selectors.catalog);
+//Шаблон модального окна
 const modalContainer = ensureElement<HTMLElement>(selectors.modal);
+//Шаблон сообщения об успешной отправки заказа
 const success_Template = cloneTemplate(ensureElement<HTMLTemplateElement>(selectors.success));
+//Главная страница приложения
+const page = ensureElement<HTMLElement>(selectors.page);
 
 //Инициализируем классы
 const api = new WebLarekApi(API_URL);//API для подключению к серверу
 const event = new EventEmitter();//Слушатель событий
 const appData = new AppModel({}, event);//Модель данных всего приложения
-const mainPage = new MainPage(catalog, event);//Отображение страницы
+const mainPage = new MainPage(page, event);//Отображение страницы
 const modal = new Modal(modalContainer, event);//Отображенине модального окна
 const cart = new Cart(cart_Template, event);//Отображение корзины
 //Инициализация форм ввода пользовательской информации
@@ -62,13 +64,13 @@ event.on(eventList.MODEL_CHANGE, () => {
   // Из списка товаров получаем отдельный массив HTML элементов -
   // - карточек товаров. Каждая карточка, при клике, инициализирует событие "PRODUCT_PREVIEW"
   const catalog = appData.getProducts().map(product => {
-    const productCard = new ProductCard(cloneTemplate(productInCatalog_Template), {
+    const productCard_inCatalog = new ProductCard(cloneTemplate(productInCatalog_Template), {
       //При клике по карточке инициализируется событие PRODUCT_PREVIEW и отправляется объект продукта 
       onClick: () => event.emit(eventList.PRODUCT_PREVIEW, product),
     });
     //Формируем каталог (productCard:HTMLElement[]) из элементов
     // массива всех продуктов (product) и объекта представления (productCard)
-    return productCard.render({
+    return productCard_inCatalog.render({
       category: product.category,
       title: product.title,
       image: CDN_URL + product.image,
@@ -85,8 +87,8 @@ event.on(eventList.MODEL_CHANGE, () => {
 
 //Открытие модального окна с подробным описанием товара
 event.on(eventList.PRODUCT_PREVIEW, (product: ProductView) => {
-  const ProductPreview = new ProductCard(cloneTemplate(productInPreview_Template), {
-    onClick: () => {      
+  const ProductCard_Preview = new ProductCard(cloneTemplate(productInPreview_Template), {
+    onClick: () => {
       //При клике на кнопку внутри карточки в зависимости от того, был ли просматриваемый товар добавлен в корзину
       // иницализируем события - удалить товар из корзины "PRODUCT_REMOVE" или добавить в корзину - "PRODUCT_ADD"
       //Для обработки события, также, отправляем объект товара
@@ -96,7 +98,7 @@ event.on(eventList.PRODUCT_PREVIEW, (product: ProductView) => {
     },
   });
   modal.render({
-    content: ProductPreview.render({
+    content: ProductCard_Preview.render({
       image: CDN_URL + product.image,
       category: product.category,
       title: product.title,
@@ -110,34 +112,27 @@ event.on(eventList.PRODUCT_PREVIEW, (product: ProductView) => {
 })
 
 //Событие клика по кнопке "Добавить в корзину" в карточке товара
-event.on(eventList.PRODUCT_ADD, (product: ProductView) => {
-  appData.addToCart(product.id);
-    //Вызываем события открытия карточки товара для обновленяя ее содержимого после добавления в корзину
-    event.emit(eventList.CART_CHANGE, product);
-})
+event.on(eventList.PRODUCT_ADD, (product: ProductView) => appData.addToCart(product.id))
 
 //Событие клика по кнопке "Удалить из корзины" в карточке товара
-event.on(eventList.PRODUCT_REMOVE, (product: ProductView) => {
-  appData.removeProductFromCart(product.id);
-  //Вызываем события открытия карточки товара для обновленяя ее содержимого после удаления
-  event.emit(eventList.CART_CHANGE, product);
-})
+event.on(eventList.PRODUCT_REMOVE, (product: ProductView) => appData.removeProductFromCart(product.id))
 
 //Событие "открыть корзину". Данное событие иницализирует mainPage
-//В конструкторе класса кнопке корзины добавляется соотвествующий обработчик клика
+//В конструкторе класса, кнопке корзины товаров на главной страницк, добавляется соотвествующий обработчик клика.
+//Так же данное событие инициализируется внутри самой корзины, для обновления представления корзины после удаления товара.
 event.on(eventList.CART_OPEN, () => {
   //СОбираем список товаров из корзины и формируем из них список
   const productsList = appData.getCart().map((productData, index) => {
-    const cartProduct = new ProductCard(cloneTemplate(productInCart_Template), {
+    const productCard_inCart = new ProductCard(cloneTemplate(productInCart_Template), {
       onClick: () => {
         //Удаляем товар из корзины
         event.emit(eventList.PRODUCT_REMOVE, productData);
-        //Обновляем корзину
+        //Обновляем представление корзины
         event.emit(eventList.CART_OPEN);
       },
     });
     //Отрисовка списка товаров в корзине
-    return cartProduct.render({
+    return productCard_inCart.render({
       index: index + 1,
       title: productData.title,
       price: productData.price?.toString() || '0'
@@ -170,12 +165,10 @@ event.on(eventList.CART_ORDER, () => {
 
 //При выборе метода оплаты, записываем выбранный метод
 //(выбранный метод по умолчанию находиться в объекте настроек paymentMethods_default)
-event.on(eventList.ORDER_PAYMENT_TYPE, (payment) => {
-  orderFormView.inputs.payment = Object.values(payment)[0];
-})
+event.on(eventList.ORDER_PAYMENT_TYPE, (payment) => orderFormView.inputs.payment = Object.values(payment)[0])
 
 // Изменилось одно из полей в форме заказа
-event.on(eventList.ORDER_ADDRESS_CHANGE, (data: { field: keyof IOrderForm, value: string }) => {
+event.on(eventList.ORDER_INPUTS_CHANGE, (data: { field: keyof IOrderForm, value: string }) => {
   orderFormView.setOrderField(data.field, data.value);
 });
 // Ошибка в форме заказа
@@ -236,8 +229,6 @@ event.on(eventList.CONTACTS_SUBMIT, () => {
     .then(res => {
       //Очищаем корзину
       appData.removeAllProductsFromCart();
-      //Запускаем событие отрисовки каталога
-      event.emit(eventList.MODEL_CHANGE);
       //Оформляем ответ от сервераo в положительном случае
       const success = new OrderSuccess(success_Template, {
         onClick: () => {
@@ -257,7 +248,7 @@ event.on(eventList.CONTACTS_SUBMIT, () => {
     });
 })
 
-//Обновление корзины товаров
+//Обновление счётчика товаров в корзине
 event.on(eventList.CART_CHANGE, () => mainPage.counter = appData.getCountCart())
 
 //Блокируем страницу при каждом MODAL_OPEN событии
