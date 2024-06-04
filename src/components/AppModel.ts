@@ -9,7 +9,7 @@ import { eventList, settings } from '../utils/constants';
 export class AppModel extends Model<IAppModel> implements IAppModel {
   products: IProduct[] = [];
   cart: string[] = [];
-
+  //Поля ввода пользовательской информации (приходят из форм Order и Contacts соответственно)
   order: IOrderForm = {
     address: '',
     payment: <string>settings.paymentMethods_default,

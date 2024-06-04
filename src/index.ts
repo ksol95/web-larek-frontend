@@ -86,10 +86,14 @@ event.on(eventList.MODEL_CHANGE, () => {
 //Открытие модального окна с подробным описанием товара
 event.on(eventList.PRODUCT_PREVIEW, (product: ProductView) => {
   const ProductPreview = new ProductCard(cloneTemplate(productInPreview_Template), {
-    //При клике на кнопку внутри карточки в зависимости от того, был ли просматриваемый товар добавлен в корзину
-    // иницализируем события - удалить товар из корзины "PRODUCT_REMOVE" или добавить в корзину - "PRODUCT_ADD"
-    //Для обработки события, также, отправляем объект товара
-    onClick: () => event.emit(appData.cart.includes(product.id) ? eventList.PRODUCT_REMOVE : eventList.PRODUCT_ADD, product),
+    onClick: () => {      
+      //При клике на кнопку внутри карточки в зависимости от того, был ли просматриваемый товар добавлен в корзину
+      // иницализируем события - удалить товар из корзины "PRODUCT_REMOVE" или добавить в корзину - "PRODUCT_ADD"
+      //Для обработки события, также, отправляем объект товара
+      event.emit(appData.cart.includes(product.id) ? eventList.PRODUCT_REMOVE : eventList.PRODUCT_ADD, product);
+      //Обновляем открытую карточку товара, для отображения изменения кнопки добавить\удалить товар из коризны
+      event.emit(eventList.PRODUCT_PREVIEW, product);
+    },
   });
   modal.render({
     content: ProductPreview.render({
@@ -109,14 +113,14 @@ event.on(eventList.PRODUCT_PREVIEW, (product: ProductView) => {
 event.on(eventList.PRODUCT_ADD, (product: ProductView) => {
   appData.addToCart(product.id);
     //Вызываем события открытия карточки товара для обновленяя ее содержимого после добавления в корзину
-    event.emit(eventList.PRODUCT_PREVIEW, product);
+    event.emit(eventList.CART_CHANGE, product);
 })
 
 //Событие клика по кнопке "Удалить из корзины" в карточке товара
 event.on(eventList.PRODUCT_REMOVE, (product: ProductView) => {
   appData.removeProductFromCart(product.id);
   //Вызываем события открытия карточки товара для обновленяя ее содержимого после удаления
-  event.emit(eventList.PRODUCT_PREVIEW, product);
+  event.emit(eventList.CART_CHANGE, product);
 })
 
 //Событие "открыть корзину". Данное событие иницализирует mainPage
@@ -125,7 +129,12 @@ event.on(eventList.CART_OPEN, () => {
   //СОбираем список товаров из корзины и формируем из них список
   const productsList = appData.getCart().map((productData, index) => {
     const cartProduct = new ProductCard(cloneTemplate(productInCart_Template), {
-      onClick: () => event.emit(eventList.PRODUCT_REMOVE, productData),
+      onClick: () => {
+        //Удаляем товар из корзины
+        event.emit(eventList.PRODUCT_REMOVE, productData);
+        //Обновляем корзину
+        event.emit(eventList.CART_OPEN);
+      },
     });
     //Отрисовка списка товаров в корзине
     return cartProduct.render({
