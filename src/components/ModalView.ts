@@ -27,7 +27,7 @@ export class Modal extends Component<IModalData> {
 	}
 
 	//Обработчик нажатия клавиши Esc
-	escHandle = (event: KeyboardEvent) => {
+	protected escHandle = (event: KeyboardEvent) => {
 		if (event.key === "Escape") this.close()
 	}
 
