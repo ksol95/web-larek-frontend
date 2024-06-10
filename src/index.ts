@@ -5,6 +5,7 @@ import { ProductView } from './types/view/productView'
 import { IOrderForm, IContactsForm, PaymentType } from './types/view/formsView'
 //Компоненты
 import { EventEmitter } from './components/base/events';
+import { LocStorage } from './components/base/locStorage';
 import { WebLarekApi } from './components/WebLarekApi';
 //Модель приложения, хранит в себе все необходимые данные которыми будем манипулировать
 import { AppModel } from "./components/AppModel";
@@ -40,7 +41,10 @@ const page = ensureElement<HTMLElement>(selectors.page);
 //Инициализируем классы
 const api = new WebLarekApi(API_URL);//API для подключению к серверу
 const event = new EventEmitter();//Слушатель событий
-const appData = new AppModel({}, event);//Модель данных всего приложения
+const appData = new AppModel({
+  //Загружаем в модель корзину из LocalStorage
+  cart: LocStorage.get('cart'),
+}, event);//Модель данных всего приложения
 const mainPage = new MainPage(page, event);//Отображение страницы
 const modal = new Modal(modalContainer, event);//Отображенине модального окна
 const cart = new Cart(cart_Template, event);//Отображение корзины
@@ -109,10 +113,16 @@ event.on(eventList.PRODUCT_PREVIEW, (product: ProductView) => {
 })
 
 //Событие клика по кнопке "Добавить в корзину" в карточке товара
-event.on(eventList.PRODUCT_ADD, (product: ProductView) => appData.addToCart(product.id))
+event.on(eventList.PRODUCT_ADD, (product: ProductView) => {
+  appData.addToCart(product.id);
+  LocStorage.append('cart', product.id);
+});
 
 //Событие клика по кнопке "Удалить из корзины" в карточке товара
-event.on(eventList.PRODUCT_REMOVE, (product: ProductView) => appData.removeProductFromCart(product.id))
+event.on(eventList.PRODUCT_REMOVE, (product: ProductView) => {
+  appData.removeProductFromCart(product.id);
+  LocStorage.removeItem('cart', product.id);
+});
 
 //Событие "открыть корзину". Данное событие иницализирует mainPage
 //В конструкторе класса, кнопке корзины товаров на главной страницк, добавляется соотвествующий обработчик клика.
@@ -148,7 +158,7 @@ event.on(eventList.CART_OPEN, () => {
 
 //Событие открытия формы ORDER, событие инициализируется в корзине при клике на кнопку "Оформить заказ"
 //Кнопка доступна когда в корзине >= 1 товар
-event.on(eventList.CART_ORDER, () => {
+event.on(eventList.ORDER_OPEN, () => {
   modal.render({
     //Форма заполняется данными из модели, при следующем открытии формы, данные сохраняться
     content: orderFormView.render({
@@ -227,6 +237,7 @@ event.on(eventList.CONTACTS_SUBMIT, () => {
       console.log(res);
       //Очищаем корзину
       appData.removeAllProductsFromCart();
+      LocStorage.clear();
       //Оформляем ответ от сервераo в положительном случае
       const success = new OrderSuccess(success_Template, {
         onClick: () => {

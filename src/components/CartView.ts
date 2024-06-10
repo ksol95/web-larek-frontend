@@ -24,7 +24,7 @@ export class Cart extends Component<ICartView> {
 
 		if (this._button) {
 			this._button.addEventListener('click', () => {
-				events.emit(eventList.CART_ORDER);
+				events.emit(eventList.ORDER_OPEN);
 			});
 		}
 

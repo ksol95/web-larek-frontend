@@ -132,7 +132,7 @@ export const eventList = {
 	//Событие открытия окна с корзиной
 	CART_OPEN: 'cart:open',
 	//Оформление заказа
-	CART_ORDER: 'cart:order',
+	ORDER_OPEN: 'order:open',
 	//Изменения корзины
 	CART_CHANGE: 'cart:change',
 
