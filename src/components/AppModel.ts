@@ -3,7 +3,7 @@ import {
   IProduct,
   IAppModel,
 } from '../types';
-import { IOrderForm, IContactsForm } from '../types/view/formsView';
+import { IOrderForm, IContactsForm, paymentMethod } from '../types/view/formsView';
 import { eventList, settings } from '../utils/constants';
 
 export class AppModel extends Model<IAppModel> implements IAppModel {
@@ -12,7 +12,7 @@ export class AppModel extends Model<IAppModel> implements IAppModel {
   //Поля ввода пользовательской информации (приходят из форм Order и Contacts соответственно)
   order: IOrderForm = {
     address: '',
-    payment: <string>settings.paymentMethods_default,
+    payment: <paymentMethod>settings.paymentMethods_default,
   };
   contacts: IContactsForm = {
     phone: '',

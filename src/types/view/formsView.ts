@@ -1,5 +1,5 @@
 export interface IOrderForm {
-	payment: string;
+	payment: paymentMethod;
 	address: string;
 }
 
@@ -12,7 +12,8 @@ export interface IFormState {
 	valid: boolean;
 	errors: string[];
 }
+export type paymentMethod = "card" | "online";
 
 export type PaymentType = {
-	type: string;
+	type: paymentMethod;
 }

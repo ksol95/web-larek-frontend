@@ -77,7 +77,7 @@ export const settings = {
 	orderForm: {
 		paymentButtons: '.button_alt',
 		paymentBtnActive: 'button_alt-active',
-		inputName: 'name',
+		inputPayment: 'payment',
 		inputAddress: 'address',
 	},
 
