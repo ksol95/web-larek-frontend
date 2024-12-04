@@ -1,6 +1,7 @@
 # Проектная работа "Вебларек"
 
 Стек: HTML, SCSS, TS, Webpack
+[Ссылка на проект](https://ksol95.github.io/web-larek-frontend/)
 
 #### Структура проекта:
 
