@@ -24,27 +24,27 @@
 
 Для установки и запуска проекта необходимо выполнить команды
 
-```
+```bash
 npm install
 npm run start
 ```
 
 или
 
-```
+```bash
 yarn
 yarn start
 ```
 
 ## Сборка
 
-```
+```bash
 npm run build
 ```
 
 или
 
-```
+```bash
 yarn build
 ```
 
@@ -58,7 +58,7 @@ yarn build
 
 #### Интерфейс описывает товар
 
-```
+```ts
 export interface IProduct {
   id: string;
   description: string;
@@ -71,7 +71,7 @@ export interface IProduct {
 
 #### Массив товаров приходящий с сервера
 
-```
+```ts
 export interface IProductList {
   total: number;
   items: IProduct[];
@@ -80,7 +80,7 @@ export interface IProductList {
 
 #### Интерфейс модели данных всего приложения
 
-```
+```ts
 export interface IAppModel {
   order: IOrderForm | null;
   contacts: IContactsForm | null;
@@ -109,7 +109,7 @@ export interface IAppModel {
 
 #### Интерфейс для подключения к API
 
-```
+```ts
 export interface IWebLarekApi {
   //Получить товары
   getProductList(): Promise<IProductList>;
@@ -122,7 +122,7 @@ export interface IWebLarekApi {
 
 #### Интерфейс для получения результатов заказа
 
-```
+```ts
 export interface IOrderResult {
   id?: string;
   total: totalPrice;
@@ -132,7 +132,7 @@ export interface IOrderResult {
 
 #### Объект для отправки заказа
 
-```
+```ts
 export interface IOrderBody extends totalPrice {
   payment: string;
   address: string;
@@ -144,42 +144,38 @@ export interface IOrderBody extends totalPrice {
 
 #### Тип totalPrice используется внутри других интерфейсов
 
-```
+```ts
 export type totalPrice = { total: number | null };
 ```
 
 #### Тип принимает ограниченные значения соответствующие с названиями категорий товаров с сервера
 
-```
+```ts
 export type ProductCategory =
-  | 'софт-скил'
-  | 'хард-скил'
-  | 'другое'
-  | 'дополнительное'
-  | 'кнопка';
+  | "софт-скил"
+  | "хард-скил"
+  | "другое"
+  | "дополнительное"
+  | "кнопка";
 ```
 
 #### Интерфейс для отображения карточки товара
 
-```
+```ts
 export type ProductView = {
   id: string;
-
 
   title: string;
   price: string;
   image: string;
 
-
   description: string | string[];
   category: ProductCategory;
-
 
   inCart: boolean;
   inMarket: boolean;
   index: number;
 };
-
 
 export interface IProductActions {
   onClick: (event: MouseEvent) => void;
@@ -188,7 +184,7 @@ export interface IProductActions {
 
 #### Интерфейс для отображения главной страницы
 
-```
+```ts
 export interface IPageView {
   //Массив карточек с товарами
   catalog: HTMLElement[];
@@ -199,15 +195,15 @@ export interface IPageView {
 
 #### Интерфейс для модельного окна
 
-```
+```ts
 export interface IModalData {
-	content: HTMLElement;
+  content: HTMLElement;
 }
 ```
 
 #### Отображение корзины
 
-```
+```ts
 export interface ICartView {
   products: HTMLElement[];
   total: number;
@@ -217,20 +213,18 @@ export interface ICartView {
 
 #### Интерфейсы необходимые для работы форм
 
-```
-export type paymentMethod = "card" | "online"
+```ts
+export type paymentMethod = "card" | "online";
 
 export interface IOrderForm {
   payment: paymentMethod;
   address: string;
 }
 
-
 export interface IContactsForm {
   email: string;
   phone: string;
 }
-
 
 export interface IFormState {
   valid: boolean;
@@ -238,8 +232,8 @@ export interface IFormState {
 }
 
 export type PaymentType = {
-	type: string;
-}
+  type: string;
+};
 ```
 
 ## Компоненты
@@ -302,7 +296,7 @@ export type PaymentType = {
 
 Реализует паттерн «Наблюдатель» и позволяет подписываться на события и уведомлять подписчиков о наступлении события
 
-```
+```ts
 constructor() {
   this._events = new Map<EventName, Set<Subscriber>>();
 }
@@ -533,56 +527,53 @@ constructor() {
 
 ### Метод
 
-- `set total(number)`- Заполняет сообщение в элементе \_description сообщением об успешном заказе и общей сумме заказа.
+- `set total(number)`- Заполняет сообщение в элементе _description_ сообщением об успешном заказе и общей сумме заказа.
 
 ## 4. Описание событий
 
 События хранятся в объекте - "eventList" описаном в файле "./utils/constants.ts".
 
-```
+```ts
 export const eventList = {
   //Изменение в списке продуктов
-  MODEL_CHANGE: 'product:change',
+  MODEL_CHANGE: "product:change",
   //Открыть превью товара
-  PRODUCT_PREVIEW: 'prduct:preview',
+  PRODUCT_PREVIEW: "prduct:preview",
   //Добавление в корзину
-  PRODUCT_ADD: 'prduct:addToCart',
+  PRODUCT_ADD: "prduct:addToCart",
   //Удаление из корзины
-  PRODUCT_REMOVE: 'prduct:removeFromCart',
+  PRODUCT_REMOVE: "prduct:removeFromCart",
   //Очистить всю корзину
-  PRODUCT_REMOVE_ALL: 'prduct:removeAllFromCart',
-
+  PRODUCT_REMOVE_ALL: "prduct:removeAllFromCart",
 
   //Событие открытия окна с корзиной
-  CART_OPEN: 'cart:open',
+  CART_OPEN: "cart:open",
   //Оформление заказа
-  CART_ORDER: 'cart:order',
+  CART_ORDER: "cart:order",
   //Изменения корзины
-  CART_CHANGE: 'cart:change',
-
+  CART_CHANGE: "cart:change",
 
   //Выбор типа оплаты
-  ORDER_PAYMENT_TYPE: 'order:changePaymentType',
+  ORDER_PAYMENT_TYPE: "order:changePaymentType",
   //Изменение в инпуте "адрес"
   ORDER_INPUTS_CHANGE: /^order\..*:change/,
   //Ошибка формы заказа
-  ORDER_ERROR: 'orderFormErrors:change',
+  ORDER_ERROR: "orderFormErrors:change",
   //Форма заказа без ошибок
-  ORDER_READY: 'orderFormErrors:ready',
+  ORDER_READY: "orderFormErrors:ready",
   //Отправка формы ORDER
-  ORDER_SUBMIT: 'order:submit',
-
+  ORDER_SUBMIT: "order:submit",
 
   //Изменение в инпуте "адрес"
   CONTACTS_INPUTS_CHANGE: /^contacts\..*:change/,
   //Ошибка формы контактов
-  CONTACTS_ERROR: 'contactsFormErrors:change',
+  CONTACTS_ERROR: "contactsFormErrors:change",
   //Форма контакты без ошибок
-  CONTACTS_READY: 'contactsFormErrors:ready',
+  CONTACTS_READY: "contactsFormErrors:ready",
   //Отправка формы ORDER
-  CONTACTS_SUBMIT: 'contacts:submit',
+  CONTACTS_SUBMIT: "contacts:submit",
 
-	//Открытие/закрытие любого модельного окна
-	MODAL_OPEN_CLOSE: 'modal:open/close',
-}
+  //Открытие/закрытие любого модельного окна
+  MODAL_OPEN_CLOSE: "modal:open/close",
+};
 ```
